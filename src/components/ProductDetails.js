@@ -23,13 +23,13 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                 if (product.categoryId) {
                     // Try fetching from same category first
                     query = `*[_type == "product" && category._ref == $catId && _id != $prodId][0...6] {
-                        _id, name, price, image, slug, "categoryId": category._ref
+                        _id, name, price, comparePrice, image, slug, "categoryId": category._ref
                     }`;
                     params.catId = product.categoryId;
                 } else {
                     // Just fetch any other products
                     query = `*[_type == "product" && _id != $prodId][0...6] {
-                        _id, name, price, image, slug, "categoryId": category._ref
+                        _id, name, price, comparePrice, image, slug, "categoryId": category._ref
                     }`;
                 }
 
@@ -38,7 +38,7 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                 // If no related products found in category, get any others
                 if (data.length === 0 && product.categoryId) {
                     const fallbackQuery = `*[_type == "product" && _id != $prodId][0...6] {
-                        _id, name, price, image, slug, "categoryId": category._ref
+                        _id, name, price, comparePrice, image, slug, "categoryId": category._ref
                     }`;
                     data = await client.fetch(fallbackQuery, { prodId: product._id });
                 }
@@ -92,7 +92,25 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                     <div className="space-y-2">
                         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">{product.name}</h1>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-gray-900 text-3xl font-black">{product.price.toLocaleString()} DA</p>
+                            <div className="space-y-2">
+                                <p className="text-gray-900 text-3xl font-black">
+                                    {product.comparePrice ? (
+                                        <>
+                                            <span className="text-red-500 line-through text-xl mr-3">
+                                                {product.comparePrice.toLocaleString()} DA
+                                            </span>
+                                            {product.price.toLocaleString()} DA
+                                        </>
+                                    ) : (
+                                        <>{product.price.toLocaleString()} DA</>
+                                    )}
+                                </p>
+                                {product.comparePrice && (
+                                    <div className="text-sm bg-red-500 text-white px-3 py-1 rounded-full inline-block font-bold">
+                                        Save {(Math.round((1 - product.price / product.comparePrice) * 100))}%
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 

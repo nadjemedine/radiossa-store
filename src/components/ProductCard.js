@@ -23,7 +23,25 @@ export default function ProductCard({ product, onClick }) {
             </div>
             <div className="space-y-1 px-1">
                 <h3 className="text-[13px] font-medium text-gray-900 leading-tight line-clamp-2">{product.name}</h3>
-                <p className="text-gray-900 font-bold text-sm">{product.price.toLocaleString()} DA</p>
+                <div className="space-y-1">
+                    <p className="text-gray-900 font-bold text-sm">
+                        {product.comparePrice ? (
+                            <>
+                                <span className="text-red-500 line-through text-xs mr-2">
+                                    {product.comparePrice.toLocaleString()} DA
+                                </span>
+                                {product.price.toLocaleString()} DA
+                            </>
+                        ) : (
+                            <>{product.price.toLocaleString()} DA</>
+                        )}
+                    </p>
+                    {product.comparePrice && (
+                        <div className="text-[10px] bg-red-500 text-white px-2 py-1 rounded-full inline-block font-bold">
+                            {(Math.round((1 - product.price / product.comparePrice) * 100))}% OFF
+                        </div>
+                    )}
+                </div>
                 <button
                     onClick={(e) => {
                         e.stopPropagation();

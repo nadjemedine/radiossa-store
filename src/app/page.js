@@ -6,6 +6,7 @@ import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
 import CheckoutForm from '@/components/CheckoutForm';
 import ProductDetails from '@/components/ProductDetails';
+import Footer from '@/components/Footer';
 import { client } from '@/lib/sanity';
 import { X, ChevronRight } from 'lucide-react';
 
@@ -31,6 +32,7 @@ export default function Home() {
                     _id,
                     name,
                     price,
+                    comparePrice,
                     image,
                     description,
                     slug,
@@ -173,6 +175,7 @@ export default function Home() {
             )}
 
             <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+            <Footer />
         </div>
     );
 }

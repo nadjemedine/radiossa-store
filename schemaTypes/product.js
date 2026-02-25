@@ -23,6 +23,12 @@ export default {
             type: 'number',
         },
         {
+            name: 'comparePrice',
+            title: 'Compare Price (Discounted Price)',
+            type: 'number',
+            description: 'Original price for comparison (used to show discount)',
+        },
+        {
             name: 'image',
             title: 'Image',
             type: 'image',
