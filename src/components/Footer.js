@@ -30,15 +30,33 @@ export default function Footer() {
 
     if (!footerData) return null;
 
+    // Default colors if not specified
+    const backgroundColor = footerData.backgroundColor || '#1f2937'; // gray-800
+    const textColor = footerData.textColor || '#ffffff';
+    const iconColor = footerData.iconColor || '#ffffff';
+
     return (
-        <footer className="bg-gray-900 text-white py-12 px-4">
+        <footer 
+            className="py-12 px-4" 
+            style={{ backgroundColor: backgroundColor }}
+        >
             <div className="max-w-md mx-auto">
                 <div className="text-center mb-8">
                     {footerData.title && (
-                        <h2 className="text-2xl font-bold mb-3">{footerData.title}</h2>
+                        <h2 
+                            className="text-2xl font-bold mb-3" 
+                            style={{ color: textColor }}
+                        >
+                            {footerData.title}
+                        </h2>
                     )}
                     {footerData.description && (
-                        <p className="text-gray-300 text-sm">{footerData.description}</p>
+                        <p 
+                            className="text-sm" 
+                            style={{ color: textColor }}
+                        >
+                            {footerData.description}
+                        </p>
                     )}
                 </div>
 
@@ -52,9 +70,13 @@ export default function Footer() {
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="bg-gray-800 p-3 rounded-full hover:bg-gray-700 transition-colors"
+                                    className="p-3 rounded-full transition-colors"
+                                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                                 >
-                                    <IconComponent size={20} />
+                                    <IconComponent 
+                                        size={20} 
+                                        style={{ color: iconColor }}
+                                    />
                                 </a>
                             );
                         })}
@@ -67,7 +89,8 @@ export default function Footer() {
                             <a
                                 key={index}
                                 href={link.url}
-                                className="text-gray-300 hover:text-white text-sm transition-colors"
+                                className="text-sm transition-colors"
+                                style={{ color: textColor }}
                             >
                                 {link.title}
                             </a>
@@ -78,20 +101,39 @@ export default function Footer() {
                 {footerData.contactInfo && (
                     <div className="space-y-3 mb-8">
                         {footerData.contactInfo.phone && (
-                            <div className="flex items-center gap-2 text-gray-300">
-                                <Phone size={16} />
+                            <div 
+                                className="flex items-center gap-2" 
+                                style={{ color: textColor }}
+                            >
+                                <Phone 
+                                    size={16} 
+                                    style={{ color: iconColor }}
+                                />
                                 <span>{footerData.contactInfo.phone}</span>
                             </div>
                         )}
                         {footerData.contactInfo.email && (
-                            <div className="flex items-center gap-2 text-gray-300">
-                                <Mail size={16} />
+                            <div 
+                                className="flex items-center gap-2" 
+                                style={{ color: textColor }}
+                            >
+                                <Mail 
+                                    size={16} 
+                                    style={{ color: iconColor }}
+                                />
                                 <span>{footerData.contactInfo.email}</span>
                             </div>
                         )}
                         {footerData.contactInfo.address && (
-                            <div className="flex items-start gap-2 text-gray-300">
-                                <MapPin size={16} className="mt-1" />
+                            <div 
+                                className="flex items-start gap-2" 
+                                style={{ color: textColor }}
+                            >
+                                <MapPin 
+                                    size={16} 
+                                    className="mt-1" 
+                                    style={{ color: iconColor }}
+                                />
                                 <span className="text-sm">{footerData.contactInfo.address}</span>
                             </div>
                         )}
@@ -99,7 +141,15 @@ export default function Footer() {
                 )}
 
                 {footerData.copyrightText && (
-                    <div className="pt-6 border-t border-gray-800 text-center text-gray-400 text-xs">
+                    <div 
+                        className="pt-6 border-t" 
+                        style={{ 
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            color: textColor,
+                            opacity: 0.7,
+                            fontSize: '0.75rem'
+                        }}
+                    >
                         {footerData.copyrightText}
                     </div>
                 )}

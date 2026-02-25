@@ -4,6 +4,27 @@ export default {
     type: 'document',
     fields: [
         {
+            name: 'backgroundColor',
+            title: 'Background Color',
+            type: 'string',
+            description: 'Hex color code for footer background',
+            validation: (Rule) => Rule.regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).error('Must be a valid hex color'),
+        },
+        {
+            name: 'textColor',
+            title: 'Text Color',
+            type: 'string',
+            description: 'Hex color code for footer text',
+            validation: (Rule) => Rule.regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).error('Must be a valid hex color'),
+        },
+        {
+            name: 'iconColor',
+            title: 'Icon Color',
+            type: 'string',
+            description: 'Hex color code for footer icons',
+            validation: (Rule) => Rule.regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).error('Must be a valid hex color'),
+        },
+        {
             name: 'title',
             title: 'Footer Title',
             type: 'string',
