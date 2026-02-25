@@ -1,16 +1,55 @@
 "use client";
 
 import { useCart } from '@/lib/cart-context';
-import { urlFor } from '@/lib/sanity';
+import { urlFor, client } from '@/lib/sanity';
 import Image from 'next/image';
 import { Minus, Plus, ShoppingBag, Truck, ShieldCheck, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import ProductCard from './ProductCard';
 
-export default function ProductDetails({ product, onClose }) {
+export default function ProductDetails({ product, onClose, onNavigate }) {
     const { addToCart } = useCart();
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
     const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
+
+    useEffect(() => {
+        const fetchRelated = async () => {
+            try {
+                let query;
+                let params = { prodId: product._id };
+
+                if (product.categoryId) {
+                    // Try fetching from same category first
+                    query = `*[_type == "product" && category._ref == $catId && _id != $prodId][0...6] {
+                        _id, name, price, image, slug, "categoryId": category._ref
+                    }`;
+                    params.catId = product.categoryId;
+                } else {
+                    // Just fetch any other products
+                    query = `*[_type == "product" && _id != $prodId][0...6] {
+                        _id, name, price, image, slug, "categoryId": category._ref
+                    }`;
+                }
+
+                let data = await client.fetch(query, params);
+
+                // If no related products found in category, get any others
+                if (data.length === 0 && product.categoryId) {
+                    const fallbackQuery = `*[_type == "product" && _id != $prodId][0...6] {
+                        _id, name, price, image, slug, "categoryId": category._ref
+                    }`;
+                    data = await client.fetch(fallbackQuery, { prodId: product._id });
+                }
+
+                setRelatedProducts(data);
+            } catch (error) {
+                console.error("Error fetching related products", error);
+            }
+        };
+        fetchRelated();
+    }, [product]);
 
     const handleAddToCart = () => {
         for (let i = 0; i < quantity; i++) {
@@ -25,12 +64,12 @@ export default function ProductDetails({ product, onClose }) {
 
     return (
         <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
-            {/* Mobile Header - Transparent to White on scroll */}
+            {/* Mobile Header */}
             <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 p-4 flex items-center justify-between">
                 <button onClick={onClose} className="p-2 -ml-2 text-gray-900 bg-gray-50 rounded-full active:scale-95 transition-transform">
                     <ArrowRight className="rotate-180" size={24} />
                 </button>
-                <h2 className="font-bold text-gray-900 truncate max-w-[200px]">{product.name}</h2>
+                <h2 className="font-bold text-gray-900 truncate max-w-[200px] uppercase tracking-wider text-sm">{product.name}</h2>
                 <div className="w-10"></div>
             </header>
 
@@ -45,7 +84,6 @@ export default function ProductDetails({ product, onClose }) {
                         priority
                         sizes="100vw"
                     />
-                    {/* Shadow overlay for better text contrast if needed */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
                 </div>
 
@@ -54,13 +92,13 @@ export default function ProductDetails({ product, onClose }) {
                     <div className="space-y-2">
                         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">{product.name}</h1>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-primary text-3xl font-black">{product.price.toLocaleString()} DA</p>
+                            <p className="text-gray-900 text-3xl font-black">{product.price.toLocaleString()} DA</p>
                         </div>
                     </div>
 
                     {/* Quick Features */}
                     <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                        <div className="flex-shrink-0 flex items-center gap-2 bg-pink-50/50 px-4 py-3 rounded-2xl border border-pink-100">
+                        <div className="flex-shrink-0 flex items-center gap-2 bg-primary/10 px-4 py-3 rounded-2xl border border-primary/20">
                             <ShieldCheck size={18} className="text-primary" />
                             <span className="text-[12px] font-bold text-gray-700 whitespace-nowrap">Paiement à la livraison</span>
                         </div>
@@ -68,13 +106,9 @@ export default function ProductDetails({ product, onClose }) {
 
                     {/* Selection Options */}
                     <div className="grid grid-cols-1 gap-6">
-                        {/* Color Selection */}
                         {product.colors && product.colors.length > 0 && (
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-bold text-gray-900">Couleur</h3>
-                                    <span className="text-xs text-gray-500 font-medium">{product.colors.length} options</span>
-                                </div>
+                                <h3 className="font-bold text-gray-900">Couleur</h3>
                                 <div className="flex flex-wrap gap-3">
                                     {product.colors.map(color => (
                                         <button
@@ -89,13 +123,9 @@ export default function ProductDetails({ product, onClose }) {
                             </div>
                         )}
 
-                        {/* Size Selection */}
                         {product.sizes && product.sizes.length > 0 && (
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-bold text-gray-900">Taille</h3>
-                                    <button className="text-[10px] text-primary font-bold underline underline-offset-4">GUIDE DES TAILLES</button>
-                                </div>
+                                <h3 className="font-bold text-gray-900">Taille</h3>
                                 <div className="flex flex-wrap gap-3">
                                     {product.sizes.map(size => (
                                         <button
@@ -138,6 +168,29 @@ export default function ProductDetails({ product, onClose }) {
                             </button>
                         </div>
                     </div>
+
+                    {/* Related Products */}
+                    {relatedProducts.length > 0 && (
+                        <div className="pt-8 space-y-6">
+                            <div className="flex flex-col items-center">
+                                <h3 className="text-xl font-light tracking-[0.2em] text-gray-900 uppercase">PRODUITS SIMILAIRES</h3>
+                                <div className="w-12 h-[1px] bg-primary mt-2"></div>
+                            </div>
+                            <div className="flex gap-4 overflow-x-auto pb-8 scrollbar-hide -mx-6 px-6">
+                                {relatedProducts.map(relProd => (
+                                    <div key={relProd._id} className="min-w-[150px] w-[150px] flex-shrink-0">
+                                        <ProductCard
+                                            product={relProd}
+                                            onClick={() => {
+                                                onNavigate(relProd);
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
 
@@ -156,4 +209,3 @@ export default function ProductDetails({ product, onClose }) {
         </div>
     );
 }
-

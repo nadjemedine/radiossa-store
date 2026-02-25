@@ -52,6 +52,12 @@ export default {
             options: {
                 layout: 'tags'
             }
+        },
+        {
+            name: 'category',
+            title: 'Catégorie',
+            type: 'reference',
+            to: [{ type: 'category' }]
         }
     ],
 }

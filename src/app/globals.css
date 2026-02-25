@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #F48BA9;
-  /* New requested pink */
+  --color-primary: #fcd4db;
+  /* Lighter pink requested */
   --color-primary-foreground: #ffffff;
 }
 
 :root {
   --background: #ffffff;
   --foreground: #2d2d2d;
-  --primary: #F48BA9;
+  --primary: #fcd4db;
   --primary-foreground: #ffffff;
   --card: #ffffff;
   --card-foreground: #2d2d2d;

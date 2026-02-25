@@ -108,7 +108,7 @@ export default function CheckoutForm() {
                                         {item.selectedSize && `Taille: ${item.selectedSize}`}
                                         {item.selectedColor && ` • Couleur: ${item.selectedColor}`}
                                     </p>
-                                    <p className="text-primary font-black text-sm mt-1">{item.price.toLocaleString()} DA</p>
+                                    <p className="text-gray-900 font-black text-sm mt-1">{item.price.toLocaleString()} DA</p>
                                 </div>
                                 <div className="flex items-center justify-between mt-2">
                                     <div className="flex items-center gap-4 bg-gray-50 rounded-full px-3 py-1 scale-90 -ml-2">
@@ -231,7 +231,7 @@ export default function CheckoutForm() {
                             <span>LIVRAISON:</span>
                             <span>{shippingCost > 0 ? `${shippingCost.toLocaleString()} DA` : 'Calculé...'}</span>
                         </div>
-                        <div className="flex justify-between text-lg font-black border-t border-gray-200 pt-3 text-primary">
+                        <div className="flex justify-between text-lg font-black border-t border-gray-200 pt-3 text-gray-900">
                             <span>TOTAL À PAYER:</span>
                             <span>{grandTotal.toLocaleString()} DA</span>
                         </div>

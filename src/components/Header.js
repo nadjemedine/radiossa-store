@@ -6,7 +6,7 @@ import { Search, ShoppingBag, Menu } from 'lucide-react';
 import { client, urlFor } from '@/lib/sanity';
 import { useCart } from '@/lib/cart-context';
 
-export default function Header({ onCartClick }) {
+export default function Header({ onCartClick, onMenuClick }) {
     const [logo, setLogo] = useState(null);
     const { cartCount } = useCart();
 
@@ -33,10 +33,13 @@ export default function Header({ onCartClick }) {
 
             <header className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-4">
                 <div className="max-w-md mx-auto flex justify-between items-center relative">
-                    {/* Left Icon (Search) */}
-                    <div className="flex-1 flex justify-start">
+                    {/* Left Icons (Search & Menu) */}
+                    <div className="flex-1 flex justify-start items-center gap-3">
                         <button className="p-1">
                             <Search size={22} strokeWidth={1.5} />
+                        </button>
+                        <button onClick={onMenuClick} className="p-1">
+                            <Menu size={22} strokeWidth={1.5} />
                         </button>
                     </div>
 
