@@ -145,7 +145,7 @@ export default function CheckoutForm() {
             </div>
 
             {/* Checkout Form */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-50 text-left" dir="ltr">
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-50 text-left">
                 <h2 className="text-center text-primary text-xl font-black mb-6 uppercase tracking-widest">INFOS DE LIVRAISON</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">

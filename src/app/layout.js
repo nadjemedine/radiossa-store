@@ -17,7 +17,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="ar" dir="rtl">
+        <html lang="ar" dir="ltr">
             <body className={inter.className}>
                 <CartProvider>
                     {children}
