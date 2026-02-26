@@ -35,13 +35,24 @@ export default function Footer() {
     const textColor = footerData.textColor || '#ffffff';
     const iconColor = footerData.iconColor || '#ffffff';
 
+    // Default alignments if not specified
+    const titleAlignment = footerData.titleAlignment || 'center';
+    const descriptionAlignment = footerData.descriptionAlignment || 'center';
+    const socialLinksAlignment = footerData.socialLinksAlignment || 'center';
+    const quickLinksAlignment = footerData.quickLinksAlignment || 'left';
+    const contactInfoAlignment = footerData.contactInfoAlignment || 'left';
+    const copyrightAlignment = footerData.copyrightAlignment || 'center';
+
     return (
         <footer 
             className="py-12 px-4" 
             style={{ backgroundColor: backgroundColor }}
         >
             <div className="max-w-md mx-auto">
-                <div className="text-center mb-8">
+                <div 
+                    className="mb-8" 
+                    style={{ textAlign: titleAlignment }}
+                >
                     {footerData.title && (
                         <h2 
                             className="text-2xl font-bold mb-3" 
@@ -53,7 +64,10 @@ export default function Footer() {
                     {footerData.description && (
                         <p 
                             className="text-sm" 
-                            style={{ color: textColor }}
+                            style={{ 
+                                color: textColor,
+                                textAlign: descriptionAlignment 
+                            }}
                         >
                             {footerData.description}
                         </p>
@@ -61,7 +75,10 @@ export default function Footer() {
                 </div>
 
                 {footerData.socialLinks && footerData.socialLinks.length > 0 && (
-                    <div className="flex justify-center gap-4 mb-8">
+                    <div 
+                        className="flex gap-4 mb-8"
+                        style={{ justifyContent: socialLinksAlignment === 'center' ? 'center' : socialLinksAlignment === 'right' ? 'flex-end' : 'flex-start' }}
+                    >
                         {footerData.socialLinks.map((link, index) => {
                             const IconComponent = platformIcons[link.platform] || Instagram;
                             return (
@@ -84,13 +101,19 @@ export default function Footer() {
                 )}
 
                 {footerData.quickLinks && footerData.quickLinks.length > 0 && (
-                    <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div 
+                        className="grid grid-cols-2 gap-4 mb-8"
+                        style={{ justifyContent: quickLinksAlignment === 'center' ? 'center' : quickLinksAlignment === 'right' ? 'flex-end' : 'flex-start' }}
+                    >
                         {footerData.quickLinks.map((link, index) => (
                             <a
                                 key={index}
                                 href={link.url}
                                 className="text-sm transition-colors"
-                                style={{ color: textColor }}
+                                style={{ 
+                                    color: textColor,
+                                    textAlign: quickLinksAlignment
+                                }}
                             >
                                 {link.title}
                             </a>
@@ -99,11 +122,18 @@ export default function Footer() {
                 )}
 
                 {footerData.contactInfo && (
-                    <div className="space-y-3 mb-8">
+                    <div 
+                        className="space-y-3 mb-8"
+                        style={{ textAlign: contactInfoAlignment }}
+                    >
                         {footerData.contactInfo.phone && (
                             <div 
                                 className="flex items-center gap-2" 
-                                style={{ color: textColor }}
+                                style={{ 
+                                    color: textColor,
+                                    justifyContent: contactInfoAlignment === 'center' ? 'center' : contactInfoAlignment === 'right' ? 'flex-end' : 'flex-start',
+                                    display: 'flex'
+                                }}
                             >
                                 <Phone 
                                     size={16} 
@@ -115,7 +145,11 @@ export default function Footer() {
                         {footerData.contactInfo.email && (
                             <div 
                                 className="flex items-center gap-2" 
-                                style={{ color: textColor }}
+                                style={{ 
+                                    color: textColor,
+                                    justifyContent: contactInfoAlignment === 'center' ? 'center' : contactInfoAlignment === 'right' ? 'flex-end' : 'flex-start',
+                                    display: 'flex'
+                                }}
                             >
                                 <Mail 
                                     size={16} 
@@ -127,7 +161,11 @@ export default function Footer() {
                         {footerData.contactInfo.address && (
                             <div 
                                 className="flex items-start gap-2" 
-                                style={{ color: textColor }}
+                                style={{ 
+                                    color: textColor,
+                                    justifyContent: contactInfoAlignment === 'center' ? 'center' : contactInfoAlignment === 'right' ? 'flex-end' : 'flex-start',
+                                    display: 'flex'
+                                }}
                             >
                                 <MapPin 
                                     size={16} 
@@ -147,7 +185,8 @@ export default function Footer() {
                             borderColor: 'rgba(255, 255, 255, 0.1)',
                             color: textColor,
                             opacity: 0.7,
-                            fontSize: '0.75rem'
+                            fontSize: '0.75rem',
+                            textAlign: copyrightAlignment
                         }}
                     >
                         {footerData.copyrightText}

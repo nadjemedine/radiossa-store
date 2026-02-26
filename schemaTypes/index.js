@@ -4,5 +4,7 @@ import delivery from './delivery.js'
 import order from './order.js'
 import category from './category.js'
 import footer from './footer.js'
+import preFooter from './preFooter.js'
+import lineSeparator from './lineSeparator.js'
 
-export const schemaTypes = [product, settings, delivery, order, category, footer]
+export const schemaTypes = [product, settings, delivery, order, category, footer, preFooter, lineSeparator]

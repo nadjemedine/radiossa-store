@@ -7,6 +7,8 @@ import ProductCard from '@/components/ProductCard';
 import CheckoutForm from '@/components/CheckoutForm';
 import ProductDetails from '@/components/ProductDetails';
 import Footer from '@/components/Footer';
+import PreFooter from '@/components/PreFooter';
+import LineSeparator from '@/components/LineSeparator';
 import { client } from '@/lib/sanity';
 import { X, ChevronRight } from 'lucide-react';
 
@@ -175,6 +177,8 @@ export default function Home() {
             )}
 
             <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+            <PreFooter />
+            <LineSeparator />
             <Footer />
         </div>
     );

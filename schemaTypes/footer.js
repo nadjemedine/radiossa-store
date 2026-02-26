@@ -30,6 +30,34 @@ export default {
             type: 'string',
         },
         {
+            name: 'titleAlignment',
+            title: 'Title Alignment',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Left', value: 'left' },
+                    { title: 'Center', value: 'center' },
+                    { title: 'Right', value: 'right' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'center',
+        },
+        {
+            name: 'descriptionAlignment',
+            title: 'Description Alignment',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Left', value: 'left' },
+                    { title: 'Center', value: 'center' },
+                    { title: 'Right', value: 'right' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'center',
+        },
+        {
             name: 'description',
             title: 'Footer Description',
             type: 'text',
@@ -75,6 +103,20 @@ export default {
             ]
         },
         {
+            name: 'socialLinksAlignment',
+            title: 'Social Links Alignment',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Left', value: 'left' },
+                    { title: 'Center', value: 'center' },
+                    { title: 'Right', value: 'right' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'center',
+        },
+        {
             name: 'quickLinks',
             title: 'Quick Links',
             type: 'array',
@@ -95,6 +137,20 @@ export default {
                     ]
                 }
             ]
+        },
+        {
+            name: 'quickLinksAlignment',
+            title: 'Quick Links Alignment',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Left', value: 'left' },
+                    { title: 'Center', value: 'center' },
+                    { title: 'Right', value: 'right' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'left',
         },
         {
             name: 'contactInfo',
@@ -119,9 +175,37 @@ export default {
             ]
         },
         {
+            name: 'contactInfoAlignment',
+            title: 'Contact Info Alignment',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Left', value: 'left' },
+                    { title: 'Center', value: 'center' },
+                    { title: 'Right', value: 'right' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'left',
+        },
+        {
             name: 'copyrightText',
             title: 'Copyright Text',
             type: 'string',
+        },
+        {
+            name: 'copyrightAlignment',
+            title: 'Copyright Alignment',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Left', value: 'left' },
+                    { title: 'Center', value: 'center' },
+                    { title: 'Right', value: 'right' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'center',
         }
     ],
 }
