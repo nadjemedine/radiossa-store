@@ -31,7 +31,7 @@ export default function Header({ onCartClick, onMenuClick }) {
                 Bienvenue a Radiossa Shop livraison 58 willaya
             </div>
 
-            <header className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-4">
+            <header className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-6">
                 <div className="max-w-md mx-auto flex justify-between items-center relative">
                     {/* Left Icons (Search & Menu) */}
                     <div className="flex-1 flex justify-start items-center gap-3">
@@ -43,16 +43,18 @@ export default function Header({ onCartClick, onMenuClick }) {
                         </button>
                     </div>
 
-                    {/* Center Logo - Increased Size */}
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <Image
-                            src={logo || "/logo.png"}
-                            alt="Radiossa Clothing"
-                            width={180}
-                            height={60}
-                            className="h-12 w-auto object-contain"
-                            priority
-                        />
+                    {/* Center Logo - Full Size with Header Edges */}
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-16 flex justify-center">
+                        <div className="max-w-full">
+                            <Image
+                                src={logo || "/logo.png"}
+                                alt="Radiossa Clothing"
+                                width={250}
+                                height={100}
+                                className="max-h-20 w-auto object-contain"
+                                priority
+                            />
+                        </div>
                     </div>
 
                     {/* Right Icon (Bag) */}
