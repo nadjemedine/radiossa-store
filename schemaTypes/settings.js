@@ -119,7 +119,7 @@ export default {
             title: 'Preview Title',
             type: 'string',
             description: 'Title shown in social media previews',
-            initialValue: 'Radiossa Clothing',
+            initialValue: 'Radiossa Clothing | الفخامة',
         },
         {
             name: 'previewDescription',
@@ -132,6 +132,7 @@ export default {
             name: 'siteName',
             title: 'Site Name',
             type: 'string',
+            initialValue: 'الفخامة',
         }
     ],
 }

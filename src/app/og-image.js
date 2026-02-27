@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'Radiossa Clothing';
+export const alt = 'الفخامة';
 export const size = {
   width: 1200,
   height: 630,
@@ -34,7 +34,7 @@ export default async function Image() {
             margin: '0 0 20px 0',
           }}
         >
-          Radiossa Clothing
+          Radiossa Clothing | الفخامة
         </h1>
         <p
           style={{

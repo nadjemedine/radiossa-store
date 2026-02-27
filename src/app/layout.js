@@ -14,9 +14,9 @@ export async function generateMetadata() {
       siteName
     }`);
 
-    const title = settings?.previewTitle || 'Radiossa Clothing | متجر ملابس وردي';
+    const title = settings?.previewTitle || 'Radiossa Clothing | عنوان الفخامة';
     const description = settings?.previewDescription || 'أفضل الملابس العصرية في الجزائر. توصيل سريع لجميع الولايات.';
-    const siteName = settings?.siteName || 'Radiossa Clothing';
+    const siteName = settings?.siteName || 'عنوان الفخامة';
 
     return {
       metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -39,10 +39,10 @@ export async function generateMetadata() {
     console.error('Error fetching metadata:', error);
     return {
       metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
-      title: 'Radiossa Clothing | متجر ملابس وردي',
+      title: 'Radiossa Clothing | الفخامة',
       description: 'أفضل الملابس العصرية في الجزائر. توصيل سريع لجميع الولايات.',
       openGraph: {
-        title: 'Radiossa Clothing',
+        title: 'الفخامة',
         description: 'أفضل الملابس العصرية في الجزائر. توصيل سريع لجميع الولايات.',
         images: ['/og-image.png'],
       },
