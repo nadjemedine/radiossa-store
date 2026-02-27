@@ -35,6 +35,29 @@ export default {
             placeholder: 'e.g., #E0B0FF or invert(100%)',
         },
         {
+            name: 'previewImage',
+            title: 'Preview Image (For Social Sharing)',
+            type: 'image',
+            description: 'Image that appears when sharing the link on social media or messages',
+            options: {
+                hotspot: true,
+            },
+        },
+        {
+            name: 'previewTitle',
+            title: 'Preview Title',
+            type: 'string',
+            description: 'Title shown in social media previews',
+            initialValue: 'Radiossa Clothing',
+        },
+        {
+            name: 'previewDescription',
+            title: 'Preview Description',
+            type: 'text',
+            description: 'Description shown in social media previews',
+            initialValue: 'أفضل الملابس العصرية في الجزائر. توصيل سريع لجميع الولايات.',
+        },
+        {
             name: 'siteName',
             title: 'Site Name',
             type: 'string',
