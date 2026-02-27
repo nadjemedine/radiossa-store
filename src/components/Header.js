@@ -8,6 +8,9 @@ import { useCart } from '@/lib/cart-context';
 
 export default function Header({ onCartClick, onMenuClick }) {
     const [logo, setLogo] = useState(null);
+    const [logoWidth, setLogoWidth] = useState(250);
+    const [logoHeight, setLogoHeight] = useState(100);
+    const [logoColor, setLogoColor] = useState('');
     const { cartCount } = useCart();
 
     useEffect(() => {
@@ -16,6 +19,15 @@ export default function Header({ onCartClick, onMenuClick }) {
                 const data = await client.fetch(`*[_type == "settings"][0]`);
                 if (data?.logo) {
                     setLogo(urlFor(data.logo).url());
+                }
+                if (data?.logoWidth) {
+                    setLogoWidth(data.logoWidth);
+                }
+                if (data?.logoHeight) {
+                    setLogoHeight(data.logoHeight);
+                }
+                if (data?.logoColor) {
+                    setLogoColor(data.logoColor);
                 }
             } catch (error) {
                 console.error("Error fetching settings:", error);
@@ -46,14 +58,22 @@ export default function Header({ onCartClick, onMenuClick }) {
                     {/* Center Logo - Full Size with Header Edges */}
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-16 flex justify-center">
                         <div className="max-w-full">
-                            <Image
-                                src={logo || "/logo.png"}
-                                alt="Radiossa Clothing"
-                                width={250}
-                                height={100}
-                                className="max-h-20 w-auto object-contain"
-                                priority
-                            />
+                            {logo && (
+                                <Image
+                                    src={logo}
+                                    alt="Store Logo"
+                                    width={logoWidth}
+                                    height={logoHeight}
+                                    className="w-auto object-contain"
+                                    style={{
+                                        maxHeight: `${logoHeight}px`,
+                                        filter: logoColor.startsWith('#') 
+                                            ? `drop-shadow(0 0 0 ${logoColor})` 
+                                            : logoColor
+                                    }}
+                                    priority
+                                />
+                            )}
                         </div>
                     </div>
 
