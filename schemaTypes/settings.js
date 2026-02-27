@@ -5,11 +5,27 @@ export default {
     fields: [
         {
             name: 'logo',
-            title: 'Logo',
+            title: 'Logo (Sanity - Optional)',
             type: 'image',
+            description: 'Primary logo image (used when Sanity logo is enabled)',
             options: {
                 hotspot: true,
             },
+        },
+        {
+            name: 'useLocalLogo',
+            title: 'Use Local Logo',
+            type: 'boolean',
+            description: 'Enable to use local logo from public folder instead of Sanity logo',
+            initialValue: true,
+        },
+        {
+            name: 'localLogoPath',
+            title: 'Local Logo Path',
+            type: 'string',
+            description: 'Path to local logo file in public folder',
+            initialValue: '/logo.svg',
+            hidden: ({ document }) => !document?.useLocalLogo,
         },
         {
             name: 'logoWidth',
@@ -17,7 +33,7 @@ export default {
             type: 'number',
             description: 'Width of the logo in pixels',
             initialValue: 250,
-            validation: Rule => Rule.min(50).max(500),
+            validation: Rule => Rule.min(50).max(800),
         },
         {
             name: 'logoHeight',
@@ -25,14 +41,69 @@ export default {
             type: 'number',
             description: 'Height of the logo in pixels',
             initialValue: 100,
-            validation: Rule => Rule.min(30).max(200),
+            validation: Rule => Rule.min(30).max(400),
         },
         {
-            name: 'logoColor',
+            name: 'logoMaxHeight',
+            title: 'Logo Max Height (px)',
+            type: 'number',
+            description: 'Maximum height constraint for responsive design',
+            initialValue: 120,
+            validation: Rule => Rule.min(50).max(300),
+        },
+        {
+            name: 'logoColorFilter',
             title: 'Logo Color Filter',
             type: 'string',
-            description: 'Apply color filter to logo (hex color code or CSS filter value)',
-            placeholder: 'e.g., #E0B0FF or invert(100%)',
+            description: 'CSS filter to apply to logo (e.g., brightness(1.2), contrast(1.1), sepia(0.3))',
+            placeholder: 'e.g., brightness(1.2) contrast(1.1) or hue-rotate(90deg)',
+        },
+        {
+            name: 'logoBackgroundColor',
+            title: 'Logo Background Color',
+            type: 'string',
+            description: 'Background color behind logo (hex code)',
+            placeholder: 'e.g., #ffffff or rgba(255,255,255,0.8)',
+            validation: (Rule) => Rule.regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).warning('Should be a valid hex color'),
+        },
+        {
+            name: 'logoPadding',
+            title: 'Logo Padding (px)',
+            type: 'number',
+            description: 'Padding around the logo',
+            initialValue: 0,
+            validation: Rule => Rule.min(0).max(50),
+        },
+        {
+            name: 'logoBorderRadius',
+            title: 'Logo Border Radius (px)',
+            type: 'number',
+            description: 'Rounded corners for logo container',
+            initialValue: 0,
+            validation: Rule => Rule.min(0).max(100),
+        },
+        {
+            name: 'logoAlignment',
+            title: 'Logo Alignment',
+            type: 'string',
+            description: 'Horizontal alignment of logo in header',
+            options: {
+                list: [
+                    { title: 'Left', value: 'left' },
+                    { title: 'Center', value: 'center' },
+                    { title: 'Right', value: 'right' }
+                ],
+                layout: 'radio'
+            },
+            initialValue: 'center',
+        },
+        {
+            name: 'logoMarginTop',
+            title: 'Logo Top Margin (px)',
+            type: 'number',
+            description: 'Vertical positioning adjustment',
+            initialValue: 0,
+            validation: Rule => Rule.min(-50).max(50),
         },
         {
             name: 'previewImage',

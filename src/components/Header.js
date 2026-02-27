@@ -3,31 +3,53 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Search, ShoppingBag, Menu } from 'lucide-react';
-import { client, urlFor } from '@/lib/sanity';
+import { client } from '@/lib/sanity';
 import { useCart } from '@/lib/cart-context';
 
 export default function Header({ onCartClick, onMenuClick }) {
-    const [logo, setLogo] = useState(null);
-    const [logoWidth, setLogoWidth] = useState(250);
-    const [logoHeight, setLogoHeight] = useState(100);
-    const [logoColor, setLogoColor] = useState('');
+    const [settings, setSettings] = useState({
+        useLocalLogo: true,
+        localLogoPath: '/logo.svg',
+        logoWidth: 250,
+        logoHeight: 100,
+        logoMaxHeight: 120,
+        logoColorFilter: '',
+        logoBackgroundColor: '',
+        logoPadding: 0,
+        logoBorderRadius: 0,
+        logoAlignment: 'center',
+        logoMarginTop: 0
+    });
     const { cartCount } = useCart();
 
     useEffect(() => {
         async function fetchSettings() {
             try {
-                const data = await client.fetch(`*[_type == "settings"][0]`);
-                if (data?.logo) {
-                    setLogo(urlFor(data.logo).url());
-                }
-                if (data?.logoWidth) {
-                    setLogoWidth(data.logoWidth);
-                }
-                if (data?.logoHeight) {
-                    setLogoHeight(data.logoHeight);
-                }
-                if (data?.logoColor) {
-                    setLogoColor(data.logoColor);
+                const data = await client.fetch(`*[_type == "settings"][0]{
+                    useLocalLogo,
+                    localLogoPath,
+                    logoWidth,
+                    logoHeight,
+                    logoMaxHeight,
+                    logoColorFilter,
+                    logoBackgroundColor,
+                    logoPadding,
+                    logoBorderRadius,
+                    logoAlignment,
+                    logoMarginTop
+                }`);
+                
+                if (data) {
+                    setSettings(prev => ({
+                        ...prev,
+                        ...data,
+                        // Use defaults for any missing values
+                        localLogoPath: data.localLogoPath || '/logo.svg',
+                        logoWidth: data.logoWidth || 250,
+                        logoHeight: data.logoHeight || 100,
+                        logoMaxHeight: data.logoMaxHeight || 120,
+                        logoAlignment: data.logoAlignment || 'center'
+                    }));
                 }
             } catch (error) {
                 console.error("Error fetching settings:", error);
@@ -55,25 +77,31 @@ export default function Header({ onCartClick, onMenuClick }) {
                         </button>
                     </div>
 
-                    {/* Center Logo - Full Size with Header Edges */}
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-16 flex justify-center">
-                        <div className="max-w-full">
-                            {logo && (
-                                <Image
-                                    src={logo}
-                                    alt="Store Logo"
-                                    width={logoWidth}
-                                    height={logoHeight}
-                                    className="w-auto object-contain"
-                                    style={{
-                                        maxHeight: `${logoHeight}px`,
-                                        filter: logoColor.startsWith('#') 
-                                            ? `drop-shadow(0 0 0 ${logoColor})` 
-                                            : logoColor
-                                    }}
-                                    priority
-                                />
-                            )}
+                    {/* Logo Container - Configurable Positioning */}
+                    <div 
+                        className={`absolute top-1/2 -translate-y-1/2 w-full px-16 flex justify-${settings.logoAlignment}`}
+                        style={{ marginTop: `${settings.logoMarginTop}px` }}
+                    >
+                        <div 
+                            className="max-w-full"
+                            style={{
+                                padding: `${settings.logoPadding}px`,
+                                backgroundColor: settings.logoBackgroundColor,
+                                borderRadius: `${settings.logoBorderRadius}px`,
+                            }}
+                        >
+                            <Image
+                                src={settings.localLogoPath}
+                                alt="Store Logo"
+                                width={settings.logoWidth}
+                                height={settings.logoHeight}
+                                className="w-auto object-contain"
+                                style={{
+                                    maxHeight: `${settings.logoMaxHeight}px`,
+                                    filter: settings.logoColorFilter
+                                }}
+                                priority
+                            />
                         </div>
                     </div>
 
