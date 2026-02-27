@@ -62,7 +62,20 @@ export default function Home() {
         : categories.find(c => c._id === selectedCategoryId)?.title || "PRODUITS";
 
     return (
-        <div className="max-w-md mx-auto min-h-screen bg-background relative overflow-x-hidden">
+        <div 
+            className="max-w-md mx-auto min-h-screen bg-background relative overflow-x-hidden"
+            style={{
+                backgroundImage: 'url(/logo.svg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundAttachment: 'fixed'
+            }}
+        >
+            {/* Background overlay for better content readability */}
+            <div className="absolute inset-0 bg-white/80"></div>
+            
+            <div className="relative z-10">
             <Header
                 onCartClick={() => setActiveTab('cart')}
                 onMenuClick={() => setIsMenuOpen(true)}
@@ -180,6 +193,7 @@ export default function Home() {
             <PreFooter />
             <LineSeparator />
             <Footer />
+        </div>
         </div>
     );
 }
