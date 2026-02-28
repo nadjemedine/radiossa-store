@@ -39,18 +39,18 @@ export default function PreFooter() {
     const backgroundColor = preFooterData.backgroundColor || '#f3f4f6';
 
     return (
-        <div 
+        <div
             className="py-8 px-4"
             style={{ backgroundColor }}
         >
             <div className="max-w-md mx-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {rectangles.map((rect, index) => {
                         if (!rect) return null;
 
-                        const IconComponent = rect.icon ? 
-                            ((rect.icon.asset && rect.icon.asset._ref) ? 
-                                undefined : defaultIcons[index + 1]) : 
+                        const IconComponent = rect.icon ?
+                            ((rect.icon.asset && rect.icon.asset._ref) ?
+                                undefined : defaultIcons[index + 1]) :
                             defaultIcons[index + 1];
 
                         // Default colors if not specified
@@ -59,8 +59,8 @@ export default function PreFooter() {
                         const rectIconColor = rect.iconColor || '#000000';
 
                         // Calculate width based on percentage
-                        const colSpan = rect.widthPercentage ? 
-                            Math.max(1, Math.min(4, Math.round(rect.widthPercentage / 25))) : 
+                        const colSpan = rect.widthPercentage ?
+                            Math.max(1, Math.min(4, Math.round(rect.widthPercentage / 25))) :
                             1;
 
                         return (
@@ -74,13 +74,17 @@ export default function PreFooter() {
                             >
                                 {rect.icon && rect.icon.asset && rect.icon.asset._ref ? (
                                     <img
-                                        src={urlFor(rect.icon).width(40).height(40).url()}
+                                        src={urlFor(rect.icon).width(rect.iconSize || 40).height(rect.iconSize || 40).url()}
                                         alt={rect.title || `Icon ${index + 1}`}
-                                        className="w-10 h-10 mb-2"
+                                        className="mb-2 object-contain"
+                                        style={{
+                                            width: `${rect.iconSize || 40}px`,
+                                            height: `${rect.iconSize || 40}px`
+                                        }}
                                     />
                                 ) : (
                                     <IconComponent
-                                        size={40}
+                                        size={rect.iconSize || 40}
                                         className="mb-2"
                                         style={{ color: rectIconColor }}
                                     />

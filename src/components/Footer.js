@@ -44,29 +44,29 @@ export default function Footer() {
     const copyrightAlignment = footerData.copyrightAlignment || 'center';
 
     return (
-        <footer 
-            className="py-12 px-4" 
+        <footer
+            className="py-12 px-4"
             style={{ backgroundColor: backgroundColor }}
         >
             <div className="max-w-md mx-auto">
-                <div 
-                    className="mb-8" 
+                <div
+                    className="mb-8"
                     style={{ textAlign: titleAlignment }}
                 >
                     {footerData.title && (
-                        <h2 
-                            className="text-2xl font-bold mb-3" 
+                        <h2
+                            className="text-2xl font-bold mb-3"
                             style={{ color: textColor }}
                         >
                             {footerData.title}
                         </h2>
                     )}
                     {footerData.description && (
-                        <p 
-                            className="text-sm" 
-                            style={{ 
+                        <p
+                            className="text-sm"
+                            style={{
                                 color: textColor,
-                                textAlign: descriptionAlignment 
+                                textAlign: descriptionAlignment
                             }}
                         >
                             {footerData.description}
@@ -75,7 +75,7 @@ export default function Footer() {
                 </div>
 
                 {footerData.socialLinks && footerData.socialLinks.length > 0 && (
-                    <div 
+                    <div
                         className="flex gap-4 mb-8"
                         style={{ justifyContent: socialLinksAlignment === 'center' ? 'center' : socialLinksAlignment === 'right' ? 'flex-end' : 'flex-start' }}
                     >
@@ -90,8 +90,8 @@ export default function Footer() {
                                     className="p-3 rounded-full transition-colors"
                                     style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                                 >
-                                    <IconComponent 
-                                        size={20} 
+                                    <IconComponent
+                                        size={20}
                                         style={{ color: iconColor }}
                                     />
                                 </a>
@@ -101,7 +101,7 @@ export default function Footer() {
                 )}
 
                 {footerData.quickLinks && footerData.quickLinks.length > 0 && (
-                    <div 
+                    <div
                         className="grid grid-cols-2 gap-4 mb-8"
                         style={{ justifyContent: quickLinksAlignment === 'center' ? 'center' : quickLinksAlignment === 'right' ? 'flex-end' : 'flex-start' }}
                     >
@@ -110,7 +110,7 @@ export default function Footer() {
                                 key={index}
                                 href={link.url}
                                 className="text-sm transition-colors"
-                                style={{ 
+                                style={{
                                     color: textColor,
                                     textAlign: quickLinksAlignment
                                 }}
@@ -122,54 +122,54 @@ export default function Footer() {
                 )}
 
                 {footerData.contactInfo && (
-                    <div 
+                    <div
                         className="space-y-3 mb-8"
                         style={{ textAlign: contactInfoAlignment }}
                     >
                         {footerData.contactInfo.phone && (
-                            <div 
-                                className="flex items-center gap-2" 
-                                style={{ 
+                            <div
+                                className="flex items-center gap-2"
+                                style={{
                                     color: textColor,
                                     justifyContent: contactInfoAlignment === 'center' ? 'center' : contactInfoAlignment === 'right' ? 'flex-end' : 'flex-start',
                                     display: 'flex'
                                 }}
                             >
-                                <Phone 
-                                    size={16} 
+                                <Phone
+                                    size={16}
                                     style={{ color: iconColor }}
                                 />
                                 <span>{footerData.contactInfo.phone}</span>
                             </div>
                         )}
                         {footerData.contactInfo.email && (
-                            <div 
-                                className="flex items-center gap-2" 
-                                style={{ 
+                            <div
+                                className="flex items-center gap-2"
+                                style={{
                                     color: textColor,
                                     justifyContent: contactInfoAlignment === 'center' ? 'center' : contactInfoAlignment === 'right' ? 'flex-end' : 'flex-start',
                                     display: 'flex'
                                 }}
                             >
-                                <Mail 
-                                    size={16} 
+                                <Mail
+                                    size={16}
                                     style={{ color: iconColor }}
                                 />
                                 <span>{footerData.contactInfo.email}</span>
                             </div>
                         )}
                         {footerData.contactInfo.address && (
-                            <div 
-                                className="flex items-start gap-2" 
-                                style={{ 
+                            <div
+                                className="flex items-start gap-2"
+                                style={{
                                     color: textColor,
                                     justifyContent: contactInfoAlignment === 'center' ? 'center' : contactInfoAlignment === 'right' ? 'flex-end' : 'flex-start',
                                     display: 'flex'
                                 }}
                             >
-                                <MapPin 
-                                    size={16} 
-                                    className="mt-1" 
+                                <MapPin
+                                    size={16}
+                                    className="mt-1"
                                     style={{ color: iconColor }}
                                 />
                                 <span className="text-sm">{footerData.contactInfo.address}</span>
@@ -179,13 +179,13 @@ export default function Footer() {
                 )}
 
                 {footerData.copyrightText && (
-                    <div 
-                        className="pt-6 border-t" 
-                        style={{ 
+                    <div
+                        className="pt-6 border-t"
+                        style={{
                             borderColor: 'rgba(255, 255, 255, 0.1)',
                             color: textColor,
-                            opacity: 0.7,
                             fontSize: '0.75rem',
+                            fontWeight: 'bold',
                             textAlign: copyrightAlignment
                         }}
                     >

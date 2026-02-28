@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import SideMenu from '@/components/SideMenu';
 import ProductCard from '@/components/ProductCard';
 import CheckoutForm from '@/components/CheckoutForm';
 import ProductDetails from '@/components/ProductDetails';
@@ -15,19 +16,19 @@ import { X, ChevronRight } from 'lucide-react';
 export default function Home() {
     const [activeTab, setActiveTab] = useState('store');
     const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategoryId, setSelectedCategoryId] = useState('all');
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showSearchResults, setShowSearchResults] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const [productsData, categoriesData] = await Promise.all([
-                    client.fetch(`*[_type == "product"] | order(_createdAt desc)`),
-                    client.fetch(`*[_type == "category"]`)
+                const [productsData] = await Promise.all([
+                    client.fetch(`*[_type == "product"] | order(_createdAt desc)`)
                 ]);
                 setProducts(productsData);
-                setCategories(categoriesData);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -35,56 +36,117 @@ export default function Home() {
         fetchData();
     }, []);
 
-    const filteredProducts = selectedCategoryId === 'all'
-        ? products
-        : products.filter(product => product.category._ref === selectedCategoryId);
+    // Memoize filtered products to prevent unnecessary re-renders
+    const filteredProducts = useMemo(() => {
+        return products.filter(product => {
+            // Search filter
+            const searchMatch = !showSearchResults ||
+                searchQuery === '' ||
+                product.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const activeCategoryTitle = selectedCategoryId === 'all'
-        ? "NOUVEAUTÉS"
-        : categories.find(c => c._id === selectedCategoryId)?.title || "PRODUITS";
+            // Category filter
+            const categoryMatch = !selectedCategory ||
+                product.category?._ref === selectedCategory.id;
+
+            return searchMatch && categoryMatch;
+        });
+    }, [products, showSearchResults, searchQuery, selectedCategory]);
 
     return (
-        <div 
+        <div
             className="max-w-md mx-auto min-h-screen bg-background relative overflow-x-hidden"
         >
             {/* Background overlay for better content readability */}
             <div className="absolute inset-0 bg-white/80"></div>
-            
+
             <div className="relative z-10">
                 <Header
                     onCartClick={() => setActiveTab('cart')}
-                    onMenuClick={() => console.log('Menu clicked')}
+                    onMenuClick={() => setIsMenuOpen(true)}
+                    onLogoClick={() => {
+                        setActiveTab('store');
+                        setSelectedCategory(null);
+                        setShowSearchResults(false);
+                    }}
+                    onSearchClick={() => {
+                        console.log('Search clicked - activating search functionality');
+                        // Toggle search mode
+                        setShowSearchResults(!showSearchResults);
+                        setActiveTab('store');
+                        if (!showSearchResults) setSelectedCategory(null);
+                    }}
+                    onCategorySelect={(category) => {
+                        setSelectedCategory(category);
+                        setActiveTab('store');
+                        setShowSearchResults(false);
+                    }}
+                    activeCategoryId={selectedCategory?.id}
                 />
+
+                <SideMenu
+                    isOpen={isMenuOpen}
+                    onClose={() => setIsMenuOpen(false)}
+                    onCategorySelect={(category) => {
+                        setSelectedCategory(category);
+                        setIsMenuOpen(false);
+                        setActiveTab('store');
+                        setShowSearchResults(false);
+                    }}
+                />
+
+                <div className="flex flex-col items-center mt-6 mb-8">
+                    <h1 className="text-2xl font-bold italic text-black relative inline-block">
+                        Nos Produits
+                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-full"></div>
+                    </h1>
+                </div>
 
                 <main className="px-4 pb-20">
                     {activeTab === 'store' ? (
                         <div>
-                            {/* Categories */}
-                            <div className="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
-                                <button
-                                    onClick={() => setSelectedCategoryId('all')}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                                        selectedCategoryId === 'all'
-                                            ? 'bg-primary text-white'
-                                            : 'bg-gray-100 text-gray-600'
-                                    }`}
-                                >
-                                    TOUT
-                                </button>
-                                {categories.map(category => (
+                            {/* Category Filter Indicator */}
+                            {selectedCategory && (
+                                <div className="mb-6 flex items-center justify-between bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+                                            <ChevronRight size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Collection</p>
+                                            <h2 className="text-lg font-bold text-gray-800">{selectedCategory.name}</h2>
+                                        </div>
+                                    </div>
                                     <button
-                                        key={category._id}
-                                        onClick={() => setSelectedCategoryId(category._id)}
-                                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                                            selectedCategoryId === category._id
-                                                ? 'bg-primary text-white'
-                                                : 'bg-gray-100 text-gray-600'
-                                        }`}
+                                        onClick={() => setSelectedCategory(null)}
+                                        className="p-2 hover:bg-white rounded-full transition-colors text-primary"
                                     >
-                                        {category.title}
+                                        <X size={20} />
                                     </button>
-                                ))}
-                            </div>
+                                </div>
+                            )}
+
+                            {/* Search Input when search mode is active */}
+                            {showSearchResults && (
+                                <div className="mb-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Rechercher des produits..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full p-3 bg-gray-100 border border-gray-200 rounded-xl outline-none focus:border-primary transition-colors font-medium text-sm"
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setShowSearchResults(false);
+                                        }}
+                                        className="mt-2 text-sm text-gray-500 hover:text-primary"
+                                    >
+                                        Annuler la recherche
+                                    </button>
+                                </div>
+                            )}
+
 
                             {/* Products Grid */}
                             <div className="grid grid-cols-2 gap-4">
@@ -97,9 +159,21 @@ export default function Home() {
                                         />
                                     ))
                                 ) : (
-                                    <p className="col-span-2 text-center text-gray-400 py-10 font-medium">
-                                        Aucun produit dans cette catégorie
-                                    </p>
+                                    <div className="col-span-2 text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
+                                        <p className="text-gray-400 font-medium">
+                                            Aucun produit dans cette sélection
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedCategory(null);
+                                                setShowSearchResults(false);
+                                                setSearchQuery('');
+                                            }}
+                                            className="mt-4 text-primary font-bold text-sm underline"
+                                        >
+                                            Voir tout le catalogue
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         </div>

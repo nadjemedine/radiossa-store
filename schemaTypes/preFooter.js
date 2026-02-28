@@ -41,6 +41,13 @@ export default {
                     }
                 },
                 {
+                    name: 'iconSize',
+                    title: 'Icon Size (px)',
+                    type: 'number',
+                    initialValue: 50,
+                    validation: Rule => Rule.min(10).max(500),
+                },
+                {
                     name: 'backgroundColor',
                     title: 'Background Color',
                     type: 'string',
@@ -93,6 +100,13 @@ export default {
                     options: {
                         hotspot: true,
                     }
+                },
+                {
+                    name: 'iconSize',
+                    title: 'Icon Size (px)',
+                    type: 'number',
+                    initialValue: 50,
+                    validation: Rule => Rule.min(10).max(500),
                 },
                 {
                     name: 'backgroundColor',
@@ -149,6 +163,13 @@ export default {
                     }
                 },
                 {
+                    name: 'iconSize',
+                    title: 'Icon Size (px)',
+                    type: 'number',
+                    initialValue: 50,
+                    validation: Rule => Rule.min(10).max(500),
+                },
+                {
                     name: 'backgroundColor',
                     title: 'Background Color',
                     type: 'string',
@@ -201,6 +222,13 @@ export default {
                     options: {
                         hotspot: true,
                     }
+                },
+                {
+                    name: 'iconSize',
+                    title: 'Icon Size (px)',
+                    type: 'number',
+                    initialValue: 50,
+                    validation: Rule => Rule.min(10).max(500),
                 },
                 {
                     name: 'backgroundColor',

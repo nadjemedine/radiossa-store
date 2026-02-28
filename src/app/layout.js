@@ -55,8 +55,8 @@ export default function RootLayout({ children }) {
     <html lang="ar" dir="ltr">
       <body className={inter.className}>
         <CartProvider>
-          {children}
-        </CartProvider>
+    {children}
+</CartProvider>
       </body>
     </html>
   );

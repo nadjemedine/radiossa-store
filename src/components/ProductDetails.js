@@ -11,7 +11,7 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
     const { addToCart } = useCart();
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
-    const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
+    const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || "Standard");
     const [relatedProducts, setRelatedProducts] = useState([]);
 
     useEffect(() => {
@@ -81,8 +81,9 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                         alt={product.name}
                         fill
                         className="object-cover"
-                        priority
-                        sizes="100vw"
+                        priority={true}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                        quality={75}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
                 </div>
@@ -141,22 +142,20 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                             </div>
                         )}
 
-                        {product.sizes && product.sizes.length > 0 && (
-                            <div className="space-y-4">
-                                <h3 className="font-bold text-gray-900">Taille</h3>
-                                <div className="flex flex-wrap gap-3">
-                                    {product.sizes.map(size => (
-                                        <button
-                                            key={size}
-                                            onClick={() => setSelectedSize(size)}
-                                            className={`min-w-[50px] px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${selectedSize === size ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'}`}
-                                        >
-                                            {size}
-                                        </button>
-                                    ))}
-                                </div>
+                        <div className="space-y-4">
+                            <h3 className="font-bold text-gray-900">Taille</h3>
+                            <div className="flex flex-wrap gap-3">
+                                {(product.sizes && product.sizes.length > 0 ? product.sizes : ["Standard"]).map(size => (
+                                    <button
+                                        key={size}
+                                        onClick={() => setSelectedSize(size)}
+                                        className={`min-w-[50px] px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${selectedSize === size ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'}`}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
                             </div>
-                        )}
+                        </div>
                     </div>
 
                     {/* Description */}
@@ -197,13 +196,15 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                             <div className="flex gap-4 overflow-x-auto pb-8 scrollbar-hide -mx-6 px-6">
                                 {relatedProducts.map(relProd => (
                                     <div key={relProd._id} className="min-w-[150px] w-[150px] flex-shrink-0">
-                                        <ProductCard
-                                            product={relProd}
-                                            onClick={() => {
-                                                onNavigate(relProd);
-                                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                                            }}
-                                        />
+                                        <div className="min-w-[150px] w-[150px] flex-shrink-0">
+                                            <ProductCard
+                                                product={relProd}
+                                                onClick={() => {
+                                                    onNavigate(relProd);
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 ))}
                             </div>
