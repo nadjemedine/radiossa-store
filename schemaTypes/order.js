@@ -19,6 +19,11 @@ export default {
             type: 'string',
         },
         {
+            name: 'commune',
+            title: 'Commune',
+            type: 'string',
+        },
+        {
             name: 'shippingType',
             title: 'Shipping Type',
             type: 'string',

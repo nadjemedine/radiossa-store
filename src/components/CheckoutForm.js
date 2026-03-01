@@ -3,9 +3,24 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { client, urlFor } from '@/lib/sanity';
-import { sendOrderNotification } from '@/lib/email';
+import { submitOrder } from '@/app/actions';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
+
+const wilayaNamesFR = {
+    "1": "Adrar", "2": "Chlef", "3": "Laghouat", "4": "Oum El Bouaghi", "5": "Batna",
+    "6": "Béjaïa", "7": "Biskra", "8": "Béchar", "9": "Blida", "10": "Bouira",
+    "11": "Tamanrasset", "12": "Tébessa", "13": "Tlemcen", "14": "Tiaret", "15": "Tizi Ouzou",
+    "16": "Alger", "17": "Djelfa", "18": "Jijel", "19": "Sétif", "20": "Saïda",
+    "21": "Skikda", "22": "Sidi Bel Abbès", "23": "Annaba", "24": "Guelma", "25": "Constantine",
+    "26": "Médéa", "27": "Mostaganem", "28": "M'Sila", "29": "Mascara", "30": "Ouargla",
+    "31": "Oran", "32": "El Bayadh", "33": "Illizi", "34": "Bordj Bou Arréridj", "35": "Boumerdès",
+    "36": "El Tarf", "37": "Tindouf", "38": "Tissemsilt", "39": "El Oued", "40": "Khenchela",
+    "41": "Souk Ahras", "42": "Tipaza", "43": "Mila", "44": "Aïn Defla", "45": "Naâma",
+    "46": "Aïn Témouchent", "47": "Ghardaïa", "48": "Relizane", "49": "El M'Ghair", "50": "El Meniaa",
+    "51": "Ouled Djellal", "52": "Bordj Baji Mokhtar", "53": "Béni Abbès", "54": "Timimoun", "55": "Touggourt",
+    "56": "Djanet", "57": "In Salah", "58": "In Guezzam"
+};
 
 export default function CheckoutForm() {
     const { cart, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
@@ -40,11 +55,12 @@ export default function CheckoutForm() {
         setIsSubmitting(true);
 
         try {
+            const frenchWilayaName = wilayaNamesFR[formData.wilayaId] || (selectedWilaya ? selectedWilaya.stateName : formData.wilayaId);
             const orderDoc = {
                 _type: 'order',
                 customerName: formData.name,
                 phone: formData.phone,
-                wilaya: selectedWilaya ? `${selectedWilaya.stateCode} - ${selectedWilaya.stateName}` : formData.wilayaId,
+                wilaya: selectedWilaya ? `${formData.wilayaId} - ${frenchWilayaName}` : formData.wilayaId,
                 commune: formData.commune,
                 shippingType: formData.shippingType === 'homePrice' ? 'Domicile' : 'Bureau',
                 items: cart.map(item => ({
@@ -59,20 +75,20 @@ export default function CheckoutForm() {
                 status: 'pending'
             };
 
-            // Save order to Sanity
-            await client.create(orderDoc);
+            // Call Server Action instead of client-side libs
+            const result = await submitOrder(orderDoc);
 
-            // Send email notification
-            const emailResult = await sendOrderNotification(orderDoc);
-            
-            if (emailResult.success) {
-                alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt. Un email de confirmation a été envoyé.`);
+            if (result.success) {
+                if (result.emailSent) {
+                    alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt. Un email de confirmation a été envoyé.`);
+                } else {
+                    console.error('Email notification failed:', result.emailError);
+                    alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt. (Note: Notification email non envoyée)`);
+                }
+                clearCart();
             } else {
-                console.error('Email notification failed:', emailResult.error);
-                alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt. (Note: Notification email non envoyée)`);
+                throw new Error(result.error);
             }
-
-            clearCart();
         } catch (error) {
             console.error("Order submission error:", error);
             alert("Une erreur est survenue lors de l'envoi de la commande. Veuillez réessayer.");
@@ -166,7 +182,7 @@ export default function CheckoutForm() {
                             type="text"
                             required
                             placeholder="Votre nom complet"
-                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-primary transition-colors font-medium text-sm"
+                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-full outline-none focus:border-primary transition-colors font-medium text-sm px-6"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         />
@@ -178,7 +194,7 @@ export default function CheckoutForm() {
                             type="tel"
                             required
                             placeholder="05 / 06 / 07"
-                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-primary transition-colors font-medium text-sm"
+                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-full outline-none focus:border-primary transition-colors font-medium text-sm px-6"
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         />
@@ -189,13 +205,13 @@ export default function CheckoutForm() {
                             <label className="block text-[11px] font-black uppercase tracking-wider mb-1.5 text-gray-400">Wilaya</label>
                             <select
                                 required
-                                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-primary transition-colors font-medium text-sm appearance-none"
+                                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-full outline-none focus:border-primary transition-colors font-medium text-sm appearance-none px-6"
                                 value={formData.wilayaId}
                                 onChange={(e) => setFormData({ ...formData, wilayaId: e.target.value })}
                             >
                                 <option value="">Choisir...</option>
                                 {deliveryPrices.map(w => (
-                                    <option key={w.stateCode} value={w.stateCode}>{w.stateCode} - {w.stateName}</option>
+                                    <option key={w.stateCode} value={w.stateCode}>{w.stateCode} - {wilayaNamesFR[w.stateCode] || w.stateName}</option>
                                 ))}
                             </select>
                         </div>
@@ -205,7 +221,7 @@ export default function CheckoutForm() {
                                 type="text"
                                 required
                                 placeholder="La commune"
-                                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-primary transition-colors font-medium text-sm"
+                                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-full outline-none focus:border-primary transition-colors font-medium text-sm px-6"
                                 value={formData.commune}
                                 onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
                             />
@@ -218,14 +234,14 @@ export default function CheckoutForm() {
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, shippingType: 'homePrice' })}
-                                className={`p-4 rounded-2xl border-2 text-xs font-black transition-all uppercase tracking-widest ${formData.shippingType === 'homePrice' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white border-gray-100 text-gray-400'}`}
+                                className={`p-4 rounded-full border-2 text-xs font-black transition-all uppercase tracking-widest ${formData.shippingType === 'homePrice' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white border-gray-100 text-gray-400'}`}
                             >
                                 Domicile
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, shippingType: 'officePrice' })}
-                                className={`p-4 rounded-2xl border-2 text-xs font-black transition-all uppercase tracking-widest ${formData.shippingType === 'officePrice' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white border-gray-100 text-gray-400'}`}
+                                className={`p-4 rounded-full border-2 text-xs font-black transition-all uppercase tracking-widest ${formData.shippingType === 'officePrice' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white border-gray-100 text-gray-400'}`}
                             >
                                 Bureau
                             </button>
@@ -251,7 +267,7 @@ export default function CheckoutForm() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-primary text-white py-5 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/30 active:scale-95 transition-all uppercase tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-primary text-white py-5 rounded-full font-black text-lg mt-4 shadow-xl shadow-primary/30 active:scale-95 transition-all uppercase tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? 'ENVOI EN COURS...' : 'CONFIRMER LA COMMANDE'}
                     </button>
