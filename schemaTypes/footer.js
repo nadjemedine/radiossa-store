@@ -30,6 +30,22 @@ export default {
             type: 'string',
         },
         {
+            name: 'subLogo',
+            title: 'Sub Logo',
+            type: 'image',
+            options: {
+                hotspot: true,
+            },
+            description: 'A smaller logo displayed above the footer title',
+        },
+        {
+            name: 'subLogoWidth',
+            title: 'Sub Logo Width',
+            type: 'number',
+            description: 'Width of the sub logo in pixels (default is 60)',
+            initialValue: 60,
+        },
+        {
             name: 'titleAlignment',
             title: 'Title Alignment',
             type: 'string',

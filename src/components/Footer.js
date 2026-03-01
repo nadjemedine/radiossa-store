@@ -45,17 +45,30 @@ export default function Footer() {
 
     return (
         <footer
-            className="py-12 px-4"
+            className="py-12 px-4 mt-0 pt-0"
             style={{ backgroundColor: backgroundColor }}
         >
             <div className="max-w-md mx-auto">
                 <div
-                    className="mb-8"
+                    className="mb-0 pb-0"
                     style={{ textAlign: titleAlignment }}
                 >
+                    {footerData.subLogo && (
+                        <div className="flex justify-center mb-0 pb-0">
+                            <img
+                                src={urlFor(footerData.subLogo).url()}
+                                alt="Footer Sub Logo"
+                                style={{
+                                    width: footerData.subLogoWidth ? `${footerData.subLogoWidth}px` : '60px',
+                                    height: 'auto',
+                                    objectFit: 'contain'
+                                }}
+                            />
+                        </div>
+                    )}
                     {footerData.title && (
                         <h2
-                            className="text-2xl font-bold mb-3"
+                            className="text-2xl font-bold mb-0 mt-0"
                             style={{ color: textColor }}
                         >
                             {footerData.title}

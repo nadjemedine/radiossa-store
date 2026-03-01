@@ -42,11 +42,19 @@ export default {
         },
         {
             name: 'margin',
-            title: 'Vertical Margin',
+            title: 'Vertical Margin (cm)',
             type: 'number',
-            description: 'Space above and below the line in pixels',
-            initialValue: 20,
-            validation: Rule => Rule.min(0).max(100),
+            description: 'Space above and below the line in centimeters (e.g., 0.5)',
+            initialValue: 0.5,
+            validation: Rule => Rule.min(0).max(5),
+        },
+        {
+            name: 'marginBottom',
+            title: 'Margin Bottom (cm)',
+            type: 'number',
+            description: 'Space below the line in centimeters (between line and subLogo)',
+            initialValue: 0.5,
+            validation: Rule => Rule.min(0).max(10),
         },
     ],
 }

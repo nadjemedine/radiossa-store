@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { client, urlFor } from '@/lib/sanity';
+import { sendOrderNotification } from '@/lib/email';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 
@@ -58,9 +59,19 @@ export default function CheckoutForm() {
                 status: 'pending'
             };
 
+            // Save order to Sanity
             await client.create(orderDoc);
 
-            alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt.`);
+            // Send email notification
+            const emailResult = await sendOrderNotification(orderDoc);
+            
+            if (emailResult.success) {
+                alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt. Un email de confirmation a été envoyé.`);
+            } else {
+                console.error('Email notification failed:', emailResult.error);
+                alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt. (Note: Notification email non envoyée)`);
+            }
+
             clearCart();
         } catch (error) {
             console.error("Order submission error:", error);

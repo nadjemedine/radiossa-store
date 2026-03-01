@@ -34,6 +34,9 @@ export async function generateMetadata() {
         description,
         images: ['/og-image.png'],
       },
+      icons: {
+        icon: '/favicon.svg',
+      },
     };
   } catch (error) {
     console.error('Error fetching metadata:', error);
@@ -55,8 +58,8 @@ export default function RootLayout({ children }) {
     <html lang="ar" dir="ltr">
       <body className={inter.className}>
         <CartProvider>
-    {children}
-</CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

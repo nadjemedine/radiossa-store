@@ -24,19 +24,23 @@ export default function LineSeparator() {
     const thickness = lineData.thickness || 1;
     const style = lineData.style || 'solid';
     const color = lineData.color || '#e5e7eb';
-    const margin = lineData.margin || 20;
+    const margin = lineData.margin !== undefined ? lineData.margin : 0.5;
 
     // Convert style to CSS border style
     const borderStyle = style === 'dashed' ? 'dashed' : style === 'dotted' ? 'dotted' : 'solid';
 
+    const marginBottom = lineData.marginBottom !== undefined ? lineData.marginBottom : 0;
+    const marginTop = margin;
+
     return (
-        <div 
+        <div
             className="w-full"
             style={{
                 height: `${thickness}px`,
                 backgroundColor: color,
                 border: 'none',
-                margin: `${margin}px 0`,
+                marginTop: `${marginTop}cm`,
+                marginBottom: `${marginBottom}cm`,
                 borderTop: `${thickness}px ${borderStyle} ${color}`
             }}
         />
