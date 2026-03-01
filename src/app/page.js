@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import SideMenu from '@/components/SideMenu';
 import ProductCard from '@/components/ProductCard';
+import ProductSkeleton from '@/components/ProductSkeleton';
 import CheckoutForm from '@/components/CheckoutForm';
 import ProductDetails from '@/components/ProductDetails';
 import Footer from '@/components/Footer';
@@ -21,16 +22,20 @@ export default function Home() {
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
             try {
+                setIsLoading(true);
                 const [productsData] = await Promise.all([
                     client.fetch(`*[_type == "product"] | order(_createdAt desc)`)
                 ]);
                 setProducts(productsData);
             } catch (error) {
                 console.error("Error fetching data:", error);
+            } finally {
+                setIsLoading(false);
             }
         }
         fetchData();
@@ -150,13 +155,26 @@ export default function Home() {
 
                             {/* Products Grid */}
                             <div className="grid grid-cols-2 gap-4">
-                                {filteredProducts.length > 0 ? (
-                                    filteredProducts.map(product => (
-                                        <ProductCard
+                                {isLoading ? (
+                                    <>
+                                        <ProductSkeleton />
+                                        <ProductSkeleton />
+                                        <ProductSkeleton />
+                                        <ProductSkeleton />
+                                    </>
+                                ) : filteredProducts.length > 0 ? (
+                                    filteredProducts.map((product, index) => (
+                                        <div
                                             key={product._id}
-                                            product={product}
-                                            onClick={() => setSelectedProduct(product)}
-                                        />
+                                            className="animate-fade-in"
+                                            style={{ animationDelay: `${index * 50}ms` }}
+                                        >
+                                            <ProductCard
+                                                product={product}
+                                                onClick={() => setSelectedProduct(product)}
+                                                priority={index < 4}
+                                            />
+                                        </div>
                                     ))
                                 ) : (
                                     <div className="col-span-2 text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">

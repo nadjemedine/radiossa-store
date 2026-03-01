@@ -5,9 +5,9 @@ import Image from 'next/image';
 import { urlFor } from '@/lib/sanity';
 import { useCart } from '@/lib/cart-context';
 
-export default function ProductCard({ product, onClick }) {
+export default function ProductCard({ product, onClick, priority = false }) {
     const { addToCart } = useCart();
-    
+
     // Memoize image URL to prevent recalculation
     const imageUrl = urlFor(product.image).width(600).url();
 
@@ -20,7 +20,7 @@ export default function ProductCard({ product, onClick }) {
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 200px"
-                    loading="lazy"
+                    priority={priority}
                     quality={75}
                     placeholder="blur"
                     blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PC9zdmc+"
@@ -63,4 +63,3 @@ export default function ProductCard({ product, onClick }) {
         </div>
     );
 }
-

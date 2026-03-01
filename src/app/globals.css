@@ -30,3 +30,40 @@ body {
     @apply bg-primary text-white font-bold py-3 px-6 rounded-lg transition-all hover:opacity-90 active:scale-95 text-center cursor-pointer shadow-md;
   }
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 15s linear infinite;
+}
+
+.marquee-container {
+  overflow: hidden;
+  width: 100%;
+}

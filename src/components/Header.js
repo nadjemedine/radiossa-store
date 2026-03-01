@@ -71,9 +71,11 @@ export default function Header({ onCartClick, onMenuClick, onLogoClick, onSearch
 
     return (
         <>
-            {/* Top Bar Banner */}
-            <div className="bg-white text-primary text-[10px] py-2 px-4 text-center font-bold tracking-wider border-b border-gray-50 uppercase">
-                Bienvenue a Radiossa Shop • Livraison 58 Wilaya
+            {/* Top Bar Banner with Marquee Animation */}
+            <div className="bg-white text-primary text-[12px] py-2 border-b border-gray-50 uppercase font-bold italic tracking-wider relative overflow-hidden h-[30px] flex items-center">
+                <div className="animate-marquee whitespace-nowrap min-w-full">
+                    Bienvenue a Radiossa Shop &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Livraison 58 Wilaya &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Paiement à la livraison &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bienvenue a Radiossa Shop &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Livraison 58 Wilaya &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Paiement à la livraison &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </div>
             </div>
 
             <header className="sticky top-0 z-50 bg-white border-b border-gray-100 flex flex-col">
