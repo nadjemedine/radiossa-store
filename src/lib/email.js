@@ -1,17 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend('re_jM5eCLPw_HhcriGJv77mCyFvE3e6tPBHW');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOrderNotification(orderData) {
     try {
-        const { 
-            customerName, 
-            phone, 
-            wilaya, 
-            commune, 
-            shippingType, 
-            items, 
-            totalPrice 
+        const {
+            customerName,
+            phone,
+            wilaya,
+            commune,
+            shippingType,
+            items,
+            totalPrice
         } = orderData;
 
         // Format order items for email
@@ -88,17 +88,22 @@ export async function sendOrderNotification(orderData) {
             </html>
         `;
 
-        const response = await resend.emails.send({
-            from: 'Radiossa Shop <radiossa.shop@gmail.com>',
-            to: 'radiossa.shop@gmail.com',
+        const { data, error } = await resend.emails.send({
+            from: `Radiossa Shop <${process.env.EMAIL_FROM || 'onboarding@resend.dev'}>`,
+            to: process.env.EMAIL_TO || 'radiossa.shop@gmail.com',
             subject: `🛍️ Nouvelle Commande - ${customerName} (${totalPrice.toLocaleString()} DA)`,
             html: htmlContent,
         });
 
-        console.log('Email sent successfully:', response);
-        return { success: true, data: response };
+        if (error) {
+            console.error('Resend API Error:', error);
+            return { success: false, error: error.message };
+        }
+
+        console.log('Email sent successfully:', data.id);
+        return { success: true, data };
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Unexpected Error sending email:', error);
         return { success: false, error: error.message };
     }
 }
