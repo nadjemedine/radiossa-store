@@ -47,14 +47,14 @@ export const wilayas = [
     { id: 46, name: "عين تموشنت", home: 850, desk: 450 },
     { id: 47, name: "غرداية", home: 850, desk: 450 },
     { id: 48, name: "غليزان", home: 750, desk: 400 },
-    { id: 49, name: "تيميمون", home: 1200, desk: 800 },
-    { id: 50, name: "برج باجي مختار", home: 1500, desk: 1200 },
+    { id: 49, name: "المغير", home: 900, desk: 500 },
+    { id: 50, name: "المنيعة", home: 1000, desk: 600 },
     { id: 51, name: "أولاد جلال", home: 800, desk: 450 },
-    { id: 52, name: "بني عباس", home: 1200, desk: 800 },
-    { id: 53, name: "إن صالح", home: 1200, desk: 800 },
-    { id: 54, name: "إن قزام", home: 1500, desk: 1200 },
+    { id: 52, name: "برج باجي مختار", home: 1500, desk: 1200 },
+    { id: 53, name: "بني عباس", home: 1200, desk: 800 },
+    { id: 54, name: "تيميمون", home: 1200, desk: 800 },
     { id: 55, name: "تقرت", home: 900, desk: 500 },
     { id: 56, name: "جانت", home: 1500, desk: 1200 },
-    { id: 57, name: "المغير", home: 900, desk: 500 },
-    { id: 58, name: "المنيعة", home: 1000, desk: 600 }
+    { id: 57, name: "إن صالح", home: 1200, desk: 800 },
+    { id: 58, name: "إن قزام", home: 1500, desk: 1200 }
 ];

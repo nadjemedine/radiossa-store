@@ -37,8 +37,10 @@ export default function CheckoutForm({ onSuccess }) {
     useEffect(() => {
         async function fetchDelivery() {
             try {
-                const data = await client.fetch(`*[_type == "delivery"] | order(stateCode asc)`);
-                setDeliveryPrices(data);
+                const data = await client.fetch(`*[_type == "delivery"]`);
+                // Sort numerically by converting stateCode to number
+                const sortedData = data.sort((a, b) => parseInt(a.stateCode) - parseInt(b.stateCode));
+                setDeliveryPrices(sortedData);
             } catch (error) {
                 console.error("Error fetching delivery prices:", error);
             }
