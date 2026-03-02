@@ -22,7 +22,7 @@ const wilayaNamesFR = {
     "56": "Djanet", "57": "In Salah", "58": "In Guezzam"
 };
 
-export default function CheckoutForm() {
+export default function CheckoutForm({ onSuccess }) {
     const { cart, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
     const [deliveryPrices, setDeliveryPrices] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,13 +79,8 @@ export default function CheckoutForm() {
             const result = await submitOrder(orderDoc);
 
             if (result.success) {
-                if (result.emailSent) {
-                    alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt. Un email de confirmation a été envoyé.`);
-                } else {
-                    console.error('Email notification failed:', result.emailError);
-                    alert(`Merci ${formData.name} ! Votre commande de ${grandTotal.toLocaleString()} DA a été reçue. Nous vous contacterons bientôt. (Note: Notification email non envoyée)`);
-                }
                 clearCart();
+                if (onSuccess) onSuccess();
             } else {
                 throw new Error(result.error);
             }

@@ -11,6 +11,7 @@ import ProductDetails from '@/components/ProductDetails';
 import Footer from '@/components/Footer';
 import PreFooter from '@/components/PreFooter';
 import LineSeparator from '@/components/LineSeparator';
+import ThankYou from '@/components/ThankYou';
 import { client } from '@/lib/sanity';
 import { X, ChevronRight } from 'lucide-react';
 
@@ -195,8 +196,10 @@ export default function Home() {
                                 )}
                             </div>
                         </div>
+                    ) : activeTab === 'thanks' ? (
+                        <ThankYou onReturnToStore={() => setActiveTab('store')} />
                     ) : (
-                        <CheckoutForm />
+                        <CheckoutForm onSuccess={() => setActiveTab('thanks')} />
                     )}
                 </main>
 
