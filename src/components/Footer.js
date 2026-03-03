@@ -203,6 +203,17 @@ export default function Footer() {
                         }}
                     >
                         {footerData.copyrightText}
+                        <div className="mt-2 flex justify-center items-center gap-1 opacity-80 font-bold">
+                            <span>Powered BY</span>
+                            <a
+                                href="https://www.instagram.com/nadjem__eddine/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-bold bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] bg-clip-text text-transparent"
+                            >
+                                Nadjem Eddine
+                            </a>
+                        </div>
                     </div>
                 )}
             </div>

@@ -8,10 +8,12 @@ import ProductCard from '@/components/ProductCard';
 import ProductSkeleton from '@/components/ProductSkeleton';
 import CheckoutForm from '@/components/CheckoutForm';
 import ProductDetails from '@/components/ProductDetails';
+import ThankYou from '@/components/ThankYou';
+import SuiviCommandePage from './suivi-commande/page'; // Add import for the tracking page
+import ContactPage from './contact/page'; // Add import for the contact page
 import Footer from '@/components/Footer';
 import PreFooter from '@/components/PreFooter';
 import LineSeparator from '@/components/LineSeparator';
-import ThankYou from '@/components/ThankYou';
 import { client } from '@/lib/sanity';
 import { X, ChevronRight } from 'lucide-react';
 
@@ -24,15 +26,18 @@ export default function Home() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [storeFront, setStoreFront] = useState(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
                 setIsLoading(true);
-                const [productsData] = await Promise.all([
-                    client.fetch(`*[_type == "product"] | order(_createdAt desc)`)
+                const [productsData, storeFrontData] = await Promise.all([
+                    client.fetch(`*[_type == "product"] | order(_createdAt desc)`),
+                    client.fetch(`*[_type == "storeFront"][0]`)
                 ]);
                 setProducts(productsData);
+                if (storeFrontData) setStoreFront(storeFrontData);
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -67,6 +72,7 @@ export default function Home() {
 
             <div className="relative z-10">
                 <Header
+                    activeTab={activeTab}
                     onCartClick={() => setActiveTab('cart')}
                     onMenuClick={() => setIsMenuOpen(true)}
                     onLogoClick={() => {
@@ -98,14 +104,30 @@ export default function Home() {
                         setActiveTab('store');
                         setShowSearchResults(false);
                     }}
+                    onCartClick={() => {
+                        setActiveTab('cart');
+                        setIsMenuOpen(false);
+                    }}
+                    onNavigateToPage={(page) => setActiveTab(page)}
                 />
 
-                <div className="flex flex-col items-center mt-6 mb-8">
-                    <h1 className="text-2xl font-bold italic text-black relative inline-block">
-                        Nos Produits
-                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-full"></div>
-                    </h1>
-                </div>
+                {activeTab === 'store' && (storeFront?.showProductsTitle !== false) && (
+                    <div className="flex flex-col items-center mt-6 mb-8">
+                        <h1
+                            className={`text-2xl relative inline-block ${storeFront?.titleStyle === 'uppercase' ? 'font-black uppercase tracking-widest' :
+                                storeFront?.titleStyle === 'elegant' ? 'font-light tracking-[0.3em] uppercase' :
+                                    storeFront?.titleStyle === 'bold' ? 'font-bold' :
+                                        'font-bold italic'
+                                }`}
+                            style={{ color: storeFront?.titleColor || '#000000' }}
+                        >
+                            {storeFront?.productsTitle || 'Nos Produits'}
+                            {(storeFront?.showUnderline !== false) && (
+                                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-full"></div>
+                            )}
+                        </h1>
+                    </div>
+                )}
 
                 <main className="px-4 pb-20">
                     {activeTab === 'store' ? (
@@ -198,6 +220,10 @@ export default function Home() {
                         </div>
                     ) : activeTab === 'thanks' ? (
                         <ThankYou onReturnToStore={() => setActiveTab('store')} />
+                    ) : activeTab === 'tracking' ? (
+                        <SuiviCommandePage />
+                    ) : activeTab === 'contact' ? (
+                        <ContactPage />
                     ) : (
                         <CheckoutForm onSuccess={() => setActiveTab('thanks')} />
                     )}
@@ -213,9 +239,9 @@ export default function Home() {
                 )}
 
                 <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
-                <PreFooter />
-                <LineSeparator />
-                <Footer />
+                {activeTab !== 'contact' && <PreFooter />}
+                {activeTab !== 'contact' && <LineSeparator />}
+                {activeTab !== 'contact' && <Footer />}
             </div>
         </div>
     );

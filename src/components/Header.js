@@ -6,7 +6,7 @@ import { Search, ShoppingBag, Menu } from 'lucide-react';
 import { client } from '@/lib/sanity';
 import { useCart } from '@/lib/cart-context';
 
-export default function Header({ onCartClick, onMenuClick, onLogoClick, onSearchClick, onCategorySelect, activeCategoryId }) {
+export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClick, onSearchClick, onCategorySelect, activeCategoryId }) {
     const [settings, setSettings] = useState({
         useLocalLogo: true,
         localLogoPath: '/logo.svg',
@@ -140,25 +140,6 @@ export default function Header({ onCartClick, onMenuClick, onLogoClick, onSearch
                 </div>
 
                 {/* Categories Bar (The Menu Bar) */}
-                {categories.length > 0 && (
-                    <nav className="border-t border-gray-50 flex overflow-x-auto no-scrollbar justify-center px-4 py-3 bg-white/80 backdrop-blur-md">
-                        <div className="flex gap-8 items-center max-w-full">
-                            {categories.map((category) => (
-                                <button
-                                    key={category._id}
-                                    onClick={() => onCategorySelect({ id: category._id, name: category.name })}
-                                    className={`text-[11px] font-bold uppercase tracking-[2px] whitespace-nowrap transition-all duration-300 relative py-1
-                                        ${activeCategoryId === category._id ? 'text-primary' : 'text-gray-400 hover:text-gray-900'}`}
-                                >
-                                    {category.name}
-                                    {activeCategoryId === category._id && (
-                                        <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-primary rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300" />
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </nav>
-                )}
             </header>
 
             <style jsx>{`

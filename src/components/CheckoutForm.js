@@ -1,70 +1,103 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/lib/cart-context';
-import { client, urlFor } from '@/lib/sanity';
+import { urlFor } from '@/lib/sanity';
 import { submitOrder } from '@/app/actions';
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
+import { wilayas } from '@/lib/data';
 
-const wilayaNamesFR = {
-    "1": "Adrar", "2": "Chlef", "3": "Laghouat", "4": "Oum El Bouaghi", "5": "Batna",
-    "6": "Béjaïa", "7": "Biskra", "8": "Béchar", "9": "Blida", "10": "Bouira",
-    "11": "Tamanrasset", "12": "Tébessa", "13": "Tlemcen", "14": "Tiaret", "15": "Tizi Ouzou",
-    "16": "Alger", "17": "Djelfa", "18": "Jijel", "19": "Sétif", "20": "Saïda",
-    "21": "Skikda", "22": "Sidi Bel Abbès", "23": "Annaba", "24": "Guelma", "25": "Constantine",
-    "26": "Médéa", "27": "Mostaganem", "28": "M'Sila", "29": "Mascara", "30": "Ouargla",
-    "31": "Oran", "32": "El Bayadh", "33": "Illizi", "34": "Bordj Bou Arréridj", "35": "Boumerdès",
-    "36": "El Tarf", "37": "Tindouf", "38": "Tissemsilt", "39": "El Oued", "40": "Khenchela",
-    "41": "Souk Ahras", "42": "Tipaza", "43": "Mila", "44": "Aïn Defla", "45": "Naâma",
-    "46": "Aïn Témouchent", "47": "Ghardaïa", "48": "Relizane", "49": "El M'Ghair", "50": "El Meniaa",
-    "51": "Ouled Djellal", "52": "Bordj Baji Mokhtar", "53": "Béni Abbès", "54": "Timimoun", "55": "Touggourt",
-    "56": "Djanet", "57": "In Salah", "58": "In Guezzam"
-};
+// Build the wilaya list with codes and French names for autocomplete
+const wilayaList = wilayas.map(w => ({
+    id: w.id,
+    label: `${String(w.id).padStart(2, '0')} - ${w.nameFr}`,
+    nameFr: w.nameFr,
+    home: w.home,
+    desk: w.desk,
+}));
 
 export default function CheckoutForm({ onSuccess }) {
     const { cart, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
-    const [deliveryPrices, setDeliveryPrices] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [wilayaInput, setWilayaInput] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [selectedWilaya, setSelectedWilaya] = useState(null);
+    const suggestionsRef = useRef(null);
+    const inputRef = useRef(null);
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
-        wilayaId: '',
         commune: '',
-        shippingType: 'homePrice'
+        shippingType: 'home'
     });
 
+    // Filter wilayas based on input (only when user types something)
+    const filteredWilayas = wilayaInput.trim() === ''
+        ? []
+        : wilayaList.filter(w =>
+            w.label.toLowerCase().includes(wilayaInput.toLowerCase()) ||
+            w.nameFr.toLowerCase().includes(wilayaInput.toLowerCase()) ||
+            String(w.id).includes(wilayaInput)
+        );
+
+    // Close suggestions when clicking outside
     useEffect(() => {
-        async function fetchDelivery() {
-            try {
-                const data = await client.fetch(`*[_type == "delivery"]`);
-                // Sort numerically by converting stateCode to number
-                const sortedData = data.sort((a, b) => parseInt(a.stateCode) - parseInt(b.stateCode));
-                setDeliveryPrices(sortedData);
-            } catch (error) {
-                console.error("Error fetching delivery prices:", error);
+        function handleClickOutside(e) {
+            if (
+                suggestionsRef.current && !suggestionsRef.current.contains(e.target) &&
+                inputRef.current && !inputRef.current.contains(e.target)
+            ) {
+                setShowSuggestions(false);
             }
         }
-        fetchDelivery();
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const selectedWilaya = deliveryPrices.find(w => w.stateCode === formData.wilayaId);
-    const shippingCost = selectedWilaya ? selectedWilaya[formData.shippingType] : 0;
+    const shippingCost = selectedWilaya
+        ? (formData.shippingType === 'home' ? selectedWilaya.home : selectedWilaya.desk)
+        : 0;
     const grandTotal = totalPrice + shippingCost;
+
+    const handleWilayaSelect = (wilaya) => {
+        setSelectedWilaya(wilaya);
+        setWilayaInput(wilaya.label);
+        setShowSuggestions(false);
+    };
+
+    const handleWilayaInputChange = (e) => {
+        const value = e.target.value;
+        setWilayaInput(value);
+        setShowSuggestions(true);
+
+        // Check if the typed value exactly matches a wilaya
+        const exactMatch = wilayaList.find(w => w.label.toLowerCase() === value.toLowerCase());
+        if (exactMatch) {
+            setSelectedWilaya(exactMatch);
+        } else {
+            setSelectedWilaya(null);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!selectedWilaya) {
+            alert("Veuillez sélectionner une wilaya valide.");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
-            const frenchWilayaName = wilayaNamesFR[formData.wilayaId] || (selectedWilaya ? selectedWilaya.stateName : formData.wilayaId);
             const orderDoc = {
                 _type: 'order',
                 customerName: formData.name,
                 phone: formData.phone,
-                wilaya: selectedWilaya ? `${formData.wilayaId} - ${frenchWilayaName}` : formData.wilayaId,
+                wilaya: `${String(selectedWilaya.id).padStart(2, '0')} - ${selectedWilaya.nameFr}`,
                 commune: formData.commune,
-                shippingType: formData.shippingType === 'homePrice' ? 'Domicile' : 'Bureau',
+                shippingType: formData.shippingType === 'home' ? 'Domicile' : 'Bureau',
                 items: cart.map(item => ({
                     _key: Math.random().toString(36).substring(7),
                     productName: item.name,
@@ -73,6 +106,7 @@ export default function CheckoutForm({ onSuccess }) {
                     color: item.selectedColor || 'N/A',
                     size: item.selectedSize || 'N/A'
                 })),
+                shippingCost: shippingCost,
                 totalPrice: grandTotal,
                 status: 'pending'
             };
@@ -198,19 +232,48 @@ export default function CheckoutForm({ onSuccess }) {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
+                        {/* Wilaya Autocomplete Input */}
+                        <div className="relative">
                             <label className="block text-[11px] font-black uppercase tracking-wider mb-1.5 text-gray-400">Wilaya</label>
-                            <select
-                                required
-                                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-full outline-none focus:border-primary transition-colors font-medium text-sm appearance-none px-6"
-                                value={formData.wilayaId}
-                                onChange={(e) => setFormData({ ...formData, wilayaId: e.target.value })}
-                            >
-                                <option value="">Choisir...</option>
-                                {deliveryPrices.map(w => (
-                                    <option key={w.stateCode} value={w.stateCode}>{w.stateCode} - {wilayaNamesFR[w.stateCode] || w.stateName}</option>
-                                ))}
-                            </select>
+                            <div className="relative">
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    required
+                                    autoComplete="off"
+                                    placeholder="Tapez pour chercher..."
+                                    className={`w-full p-4 bg-gray-50 border rounded-full outline-none focus:border-primary transition-colors font-medium text-sm px-6 pr-10 ${selectedWilaya ? 'border-primary/40' : 'border-gray-100'}`}
+                                    value={wilayaInput}
+                                    onChange={handleWilayaInputChange}
+                                    onFocus={() => setShowSuggestions(true)}
+                                />
+                                <ChevronDown
+                                    size={16}
+                                    className={`absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 transition-transform ${showSuggestions ? 'rotate-180' : ''}`}
+                                />
+                            </div>
+                            {showSuggestions && (
+                                <div
+                                    ref={suggestionsRef}
+                                    className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-2xl shadow-xl max-h-52 overflow-y-auto"
+                                    style={{ scrollbarWidth: 'thin' }}
+                                >
+                                    {filteredWilayas.length > 0 ? (
+                                        filteredWilayas.map(w => (
+                                            <button
+                                                key={w.id}
+                                                type="button"
+                                                className={`w-full text-left px-5 py-3 text-sm font-medium hover:bg-primary/5 transition-colors first:rounded-t-2xl last:rounded-b-2xl ${selectedWilaya?.id === w.id ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700'}`}
+                                                onClick={() => handleWilayaSelect(w)}
+                                            >
+                                                {w.label}
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="px-5 py-4 text-sm text-gray-400 text-center">Aucune wilaya trouvée</div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <div>
                             <label className="block text-[11px] font-black uppercase tracking-wider mb-1.5 text-gray-400">Commune</label>
@@ -230,15 +293,15 @@ export default function CheckoutForm({ onSuccess }) {
                         <div className="grid grid-cols-2 gap-3">
                             <button
                                 type="button"
-                                onClick={() => setFormData({ ...formData, shippingType: 'homePrice' })}
-                                className={`p-4 rounded-full border-2 text-xs font-black transition-all uppercase tracking-widest ${formData.shippingType === 'homePrice' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white border-gray-100 text-gray-400'}`}
+                                onClick={() => setFormData({ ...formData, shippingType: 'home' })}
+                                className={`p-4 rounded-full border-2 text-xs font-black transition-all uppercase tracking-widest ${formData.shippingType === 'home' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white border-gray-100 text-gray-400'}`}
                             >
                                 Domicile
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setFormData({ ...formData, shippingType: 'officePrice' })}
-                                className={`p-4 rounded-full border-2 text-xs font-black transition-all uppercase tracking-widest ${formData.shippingType === 'officePrice' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white border-gray-100 text-gray-400'}`}
+                                onClick={() => setFormData({ ...formData, shippingType: 'desk' })}
+                                className={`p-4 rounded-full border-2 text-xs font-black transition-all uppercase tracking-widest ${formData.shippingType === 'desk' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white border-gray-100 text-gray-400'}`}
                             >
                                 Bureau
                             </button>
@@ -253,7 +316,7 @@ export default function CheckoutForm({ onSuccess }) {
                         </div>
                         <div className="flex justify-between text-xs font-bold text-gray-500">
                             <span>LIVRAISON:</span>
-                            <span>{shippingCost > 0 ? `${shippingCost.toLocaleString()} DA` : 'Calculé...'}</span>
+                            <span>{shippingCost > 0 ? `${shippingCost.toLocaleString()} DA` : 'Sélectionnez une wilaya'}</span>
                         </div>
                         <div className="flex justify-between text-lg font-black border-t border-gray-200 pt-3 text-gray-900">
                             <span>TOTAL À PAYER:</span>
@@ -263,7 +326,7 @@ export default function CheckoutForm({ onSuccess }) {
 
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !selectedWilaya}
                         className="w-full bg-primary text-white py-5 rounded-full font-black text-lg mt-4 shadow-xl shadow-primary/30 active:scale-95 transition-all uppercase tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? 'ENVOI EN COURS...' : 'CONFIRMER LA COMMANDE'}
@@ -273,4 +336,3 @@ export default function CheckoutForm({ onSuccess }) {
         </div>
     );
 }
-

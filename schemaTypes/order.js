@@ -46,6 +46,11 @@ export default {
             ]
         },
         {
+            name: 'shippingCost',
+            title: 'Shipping Cost',
+            type: 'number',
+        },
+        {
             name: 'totalPrice',
             title: 'Total Price',
             type: 'number',

@@ -6,5 +6,7 @@ import order from './order.js'
 import footer from './footer.js'
 import preFooter from './preFooter.js'
 import lineSeparator from './lineSeparator.js'
+import storeFront from './storeFront.js'
+import sideMenu from './sideMenu.js'
 
-export const schemaTypes = [category, product, settings, delivery, order, footer, preFooter, lineSeparator]
+export const schemaTypes = [category, product, settings, delivery, order, footer, preFooter, lineSeparator, storeFront, sideMenu]
