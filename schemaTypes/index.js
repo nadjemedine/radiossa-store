@@ -8,5 +8,6 @@ import preFooter from './preFooter.js'
 import lineSeparator from './lineSeparator.js'
 import storeFront from './storeFront.js'
 import sideMenu from './sideMenu.js'
+import rmExpressSettings from './rmExpressSettings.js'
 
-export const schemaTypes = [category, product, settings, delivery, order, footer, preFooter, lineSeparator, storeFront, sideMenu]
+export const schemaTypes = [category, product, settings, delivery, order, footer, preFooter, lineSeparator, storeFront, sideMenu, rmExpressSettings]

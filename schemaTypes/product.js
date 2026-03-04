@@ -51,20 +51,81 @@ export default {
             }
         },
         {
-            name: 'sizes',
-            title: 'Available Sizes',
+            name: 'inventory',
+            title: 'Inventory Management',
             type: 'array',
-            of: [{ type: 'string' }],
-            options: {
-                layout: 'tags'
-            }
+            of: [
+                {
+                    type: 'object',
+                    fields: [
+                        {
+                            name: 'size',
+                            title: 'Size',
+                            type: 'string',
+                            description: 'Size name (e.g., S, M, L, XL)',
+                        },
+                        {
+                            name: 'color',
+                            title: 'Color',
+                            type: 'string',
+                            description: 'Color name (optional)',
+                        },
+                        {
+                            name: 'stock',
+                            title: 'Stock Quantity',
+                            type: 'number',
+                            description: 'Number of items in stock',
+                            initialValue: 0,
+                        },
+                        {
+                            name: 'sku',
+                            title: 'SKU',
+                            type: 'string',
+                            description: 'Stock Keeping Unit (optional)',
+                        },
+                        {
+                            name: 'trackInventory',
+                            title: 'Track Inventory',
+                            type: 'boolean',
+                            description: 'Enable inventory tracking for this variant',
+                            initialValue: true,
+                        },
+                        {
+                            name: 'allowBackorder',
+                            title: 'Allow Backorder',
+                            type: 'boolean',
+                            description: 'Allow customers to order when out of stock',
+                            initialValue: false,
+                        },
+                    ],
+                    preview: {
+                        select: {
+                            size: 'size',
+                            color: 'color',
+                            stock: 'stock',
+                        },
+                        prepare({ size, color, stock }) {
+                            return {
+                                title: `${size} ${color ? `- ${color}` : ''}`,
+                                subtitle: `Stock: ${stock}`,
+                            };
+                        },
+                    },
+                },
+            ],
         },
         {
             name: 'category',
             title: 'Catégorie',
             type: 'reference',
             to: [{ type: 'category' }]
-        }
+        },
+        {
+            name: 'autoHideOutOfStock',
+            title: 'Auto-hide Out of Stock',
+            type: 'boolean',
+            description: 'Automatically hide product when all variants are out of stock',
+            initialValue: true,
+        },
     ],
 }
-

@@ -26,18 +26,67 @@ export default function Home() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [storeFront, setStoreFront] = useState(null);
+    const [storeFront, setStoreFront] = useState({
+        productsTitle: 'Nos Produits',
+        showProductsTitle: true,
+        titleStyle: 'bold-italic',
+        titleColor: '#000000',
+        showUnderline: true,
+    });
+
+    // Function to filter out of stock products
+    const filterOutOfStockProducts = useCallback((productsData) => {
+        return productsData.filter(product => {
+            // If product has no inventory or autoHide is disabled, show it
+            if (!product.inventory || product.inventory.length === 0) {
+                return true;
+            }
+            
+            // If autoHideOutOfStock is explicitly false, show it
+            if (product.autoHideOutOfStock === false) {
+                return true;
+            }
+            
+            // Check if at least one variant is in stock
+            const hasStock = product.inventory.some(variant => {
+                // If tracking is disabled, consider it in stock
+                if (!variant.trackInventory) {
+                    return true;
+                }
+                // If backorder is allowed, consider it available
+                if (variant.allowBackorder) {
+                    return true;
+                }
+                // Check actual stock quantity
+                return variant.stock > 0;
+            });
+            
+            return hasStock;
+        });
+    }, []);
 
     useEffect(() => {
         async function fetchData() {
             try {
                 setIsLoading(true);
+                // Fetch all products
+                const productsQuery = `*[_type == "product" && !(_id in path("drafts.**"))] | order(_createdAt desc)`;
+                
                 const [productsData, storeFrontData] = await Promise.all([
-                    client.fetch(`*[_type == "product"] | order(_createdAt desc)`),
+                    client.fetch(productsQuery),
                     client.fetch(`*[_type == "storeFront"][0]`)
                 ]);
-                setProducts(productsData);
-                if (storeFrontData) setStoreFront(storeFrontData);
+                
+                // Filter out of stock products
+                const filteredProducts = filterOutOfStockProducts(productsData);
+                setProducts(filteredProducts);
+                if (storeFrontData) {
+                    // Merge with defaults to ensure all fields are present
+                    setStoreFront(prev => ({
+                        ...prev,
+                        ...storeFrontData,
+                    }));
+                }
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -45,7 +94,21 @@ export default function Home() {
             }
         }
         fetchData();
-    }, []);
+        
+        // Re-fetch products every 30 seconds to keep inventory updated
+        const intervalId = setInterval(async () => {
+            try {
+                const productsQuery = `*[_type == "product" && !(_id in path("drafts.**"))] | order(_createdAt desc)`;
+                const productsData = await client.fetch(productsQuery);
+                const filteredProducts = filterOutOfStockProducts(productsData);
+                setProducts(filteredProducts);
+            } catch (error) {
+                console.error("Error re-fetching products:", error);
+            }
+        }, 30000); // 30 seconds
+        
+        return () => clearInterval(intervalId);
+    }, [filterOutOfStockProducts]);
 
     // Memoize filtered products to prevent unnecessary re-renders
     const filteredProducts = useMemo(() => {
@@ -111,18 +174,18 @@ export default function Home() {
                     onNavigateToPage={(page) => setActiveTab(page)}
                 />
 
-                {activeTab === 'store' && (storeFront?.showProductsTitle !== false) && (
+                {activeTab === 'store' && storeFront.showProductsTitle !== false && (
                     <div className="flex flex-col items-center mt-6 mb-8">
                         <h1
-                            className={`text-2xl relative inline-block ${storeFront?.titleStyle === 'uppercase' ? 'font-black uppercase tracking-widest' :
-                                storeFront?.titleStyle === 'elegant' ? 'font-light tracking-[0.3em] uppercase' :
-                                    storeFront?.titleStyle === 'bold' ? 'font-bold' :
+                            className={`text-2xl relative inline-block ${storeFront.titleStyle === 'uppercase' ? 'font-black uppercase tracking-widest' :
+                                storeFront.titleStyle === 'elegant' ? 'font-light tracking-[0.3em] uppercase' :
+                                    storeFront.titleStyle === 'bold' ? 'font-bold' :
                                         'font-bold italic'
                                 }`}
-                            style={{ color: storeFront?.titleColor || '#000000' }}
+                            style={{ color: storeFront.titleColor || '#000000' }}
                         >
-                            {storeFront?.productsTitle || 'Nos Produits'}
-                            {(storeFront?.showUnderline !== false) && (
+                            {storeFront.productsTitle || 'Nos Produits'}
+                            {(storeFront.showUnderline !== false) && (
                                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-full"></div>
                             )}
                         </h1>
