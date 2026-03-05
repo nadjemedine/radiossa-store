@@ -7,8 +7,8 @@ export default {
             name: 'productsTitle',
             title: 'Products Section Title',
             type: 'string',
-            description: 'The title displayed above the products grid (e.g., "Nos Produits")',
-            initialValue: 'Nos Produits',
+            description: 'The title displayed above the products grid. Leave empty to hide the title.',
+            initialValue: '',
         },
         {
             name: 'showProductsTitle',

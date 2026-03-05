@@ -8,33 +8,42 @@ export default function SuiviCommandePage() {
     const [orderStatus, setOrderStatus] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const handleTrackOrder = (e) => {
+    const handleTrackOrder = async (e) => {
         e.preventDefault();
         if (!orderId.trim()) return;
-        
+
         setLoading(true);
-        
-        // Simulate API call to track order
-        setTimeout(() => {
-            // Sample order statuses
-            const statuses = ['En traitement', 'Expédiée', 'En cours de livraison', 'Livrée'];
-            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-            
-            setOrderStatus({
-                id: orderId,
-                status: randomStatus,
-                estimatedDelivery: '2024-01-15',
-                lastUpdate: new Date().toLocaleDateString('fr-DZ'),
-            });
+        setOrderStatus(null);
+
+        try {
+            const response = await fetch(`/api/track?id=${orderId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                // Mapping RM Express status to our UI
+                // Expected statuses from RM Express: "قيد المعالجة", "تم الشحن", "في الطريق", "تم التسليم" etc.
+                setOrderStatus({
+                    id: orderId,
+                    status: data.status, // We use the status coming from API
+                    history: data.history || [],
+                    lastUpdate: new Date().toLocaleDateString('fr-DZ'),
+                });
+            } else {
+                alert('Désolé, nous n\'avons نتج أي معلومات لهذا الرقم. يرجى التأكد منه.');
+            }
+        } catch (error) {
+            console.error('Tracking error:', error);
+            alert('Une erreur est survenue lors de la recherche.');
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-md mx-auto px-4">
                 <h1 className="text-2xl font-bold text-center text-gray-900 mb-8">Suivi de Commande</h1>
-                
+
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8">
                     <form onSubmit={handleTrackOrder} className="space-y-4">
                         <div>
@@ -52,7 +61,7 @@ export default function SuiviCommandePage() {
                                 <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             </div>
                         </div>
-                        
+
                         <button
                             type="submit"
                             disabled={loading}
@@ -67,22 +76,20 @@ export default function SuiviCommandePage() {
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-gray-900">Commande #{orderStatus.id}</h2>
-                            <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                orderStatus.status === 'Livrée' ? 'bg-green-100 text-green-800' :
-                                orderStatus.status === 'En cours de livraison' ? 'bg-blue-100 text-blue-800' :
-                                orderStatus.status === 'Expédiée' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-800'
-                            }`}>
+                            <div className={`px-3 py-1 rounded-full text-xs font-bold ${orderStatus.status === 'Livrée' ? 'bg-green-100 text-green-800' :
+                                    orderStatus.status === 'En cours de livraison' ? 'bg-blue-100 text-blue-800' :
+                                        orderStatus.status === 'Expédiée' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-gray-100 text-gray-800'
+                                }`}>
                                 {orderStatus.status}
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <div className="flex items-start">
-                                <div className={`p-2 rounded-full ${
-                                    orderStatus.status === 'Livrée' ? 'bg-green-100 text-green-600' :
-                                    'bg-gray-100 text-gray-400'
-                                }`}>
+                                <div className={`p-2 rounded-full ${orderStatus.status === 'Livrée' ? 'bg-green-100 text-green-600' :
+                                        'bg-gray-100 text-gray-400'
+                                    }`}>
                                     <CheckCircle size={20} />
                                 </div>
                                 <div className="ml-4 flex-1">
@@ -92,10 +99,9 @@ export default function SuiviCommandePage() {
                             </div>
 
                             <div className="flex items-start">
-                                <div className={`p-2 rounded-full ${
-                                    ['Expédiée', 'En cours de livraison', 'Livrée'].includes(orderStatus.status) ? 
-                                    'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
-                                }`}>
+                                <div className={`p-2 rounded-full ${['Expédiée', 'En cours de livraison', 'Livrée'].includes(orderStatus.status) ?
+                                        'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+                                    }`}>
                                     <Truck size={20} />
                                 </div>
                                 <div className="ml-4 flex-1">
@@ -105,10 +111,9 @@ export default function SuiviCommandePage() {
                             </div>
 
                             <div className="flex items-start">
-                                <div className={`p-2 rounded-full ${
-                                    ['En cours de livraison', 'Livrée'].includes(orderStatus.status) ? 
-                                    'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
-                                }`}>
+                                <div className={`p-2 rounded-full ${['En cours de livraison', 'Livrée'].includes(orderStatus.status) ?
+                                        'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+                                    }`}>
                                     <Package size={20} />
                                 </div>
                                 <div className="ml-4 flex-1">
@@ -118,10 +123,9 @@ export default function SuiviCommandePage() {
                             </div>
 
                             <div className="flex items-start">
-                                <div className={`p-2 rounded-full ${
-                                    orderStatus.status === 'Livrée' ? 
-                                    'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                                }`}>
+                                <div className={`p-2 rounded-full ${orderStatus.status === 'Livrée' ?
+                                        'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                                    }`}>
                                     <CheckCircle size={20} />
                                 </div>
                                 <div className="ml-4 flex-1">

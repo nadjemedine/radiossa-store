@@ -129,15 +129,51 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                             <div className="space-y-4">
                                 <h3 className="font-bold text-gray-900">Couleur</h3>
                                 <div className="flex flex-wrap gap-3">
-                                    {product.colors.map(color => (
-                                        <button
-                                            key={color}
-                                            onClick={() => setSelectedColor(color)}
-                                            className={`min-w-[60px] px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${selectedColor === color ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'}`}
-                                        >
-                                            {color}
-                                        </button>
-                                    ))}
+                                    {product.colors.map(colorStr => {
+                                        // Support "Name|Color" or "Name:Color" format (e.g. "أحمر|#ff0000")
+                                        const parts = colorStr.includes('|') ? colorStr.split('|') : colorStr.includes(':') ? colorStr.split(':') : [colorStr];
+                                        const displayName = parts[0].trim();
+                                        const rawColor = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+
+                                        // Mapping Arabic/English names to CSS colors for common cases
+                                        const colorMap = {
+                                            'أسود': '#000000', 'Black': '#000000', 'noir': '#000000',
+                                            'أبيض': '#FFFFFF', 'White': '#FFFFFF', 'blanc': '#FFFFFF',
+                                            'أحمر': '#ef4444', 'Red': '#ef4444', 'rouge': '#ef4444',
+                                            'أزرق': '#3b82f6', 'Blue': '#3b82f6', 'bleu': '#3b82f6',
+                                            'أخضر': '#22c55e', 'Green': '#22c55e', 'vert': '#22c55e',
+                                            'أصفر': '#eab308', 'Yellow': '#eab308', 'jaune': '#eab308',
+                                            'بني': '#92400e', 'Brown': '#92400e', 'marron': '#92400e',
+                                            'رمادي': '#6b7280', 'Grey': '#6b7280', 'gris': '#6b7280',
+                                            'وردي': '#ec4899', 'Pink': '#ec4899', 'rose': '#ec4899',
+                                            'برتقالي': '#f97316', 'Orange': '#f97316',
+                                            'بنفسجي': '#8b5cf6', 'Purple': '#8b5cf6', 'violet': '#8b5cf6',
+                                            'كحلي': '#1e3a8a', 'Navy': '#1e3a8a', 'marine': '#1e3a8a'
+                                        };
+
+                                        const bgColor = colorMap[rawColor] || rawColor;
+                                        const isWhite = bgColor.toLowerCase() === '#ffffff' || bgColor.toLowerCase() === 'white';
+                                        const isActive = selectedColor === colorStr;
+
+                                        return (
+                                            <div key={colorStr} className="flex flex-col items-center gap-2">
+                                                <button
+                                                    onClick={() => setSelectedColor(colorStr)}
+                                                    className={`w-10 h-10 rounded-full border-2 transition-all duration-300 relative ${isActive ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-gray-100 hover:border-gray-300'}`}
+                                                    style={{ backgroundColor: bgColor }}
+                                                    title={displayName}
+                                                >
+                                                    {isWhite && <div className="absolute inset-0 border border-gray-100 rounded-full pointer-events-none" />}
+                                                    {isActive && (
+                                                        <div className={`absolute inset-0 flex items-center justify-center`}>
+                                                            <div className={`w-2 h-2 rounded-full ${isWhite ? 'bg-primary' : 'bg-white'}`} />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                                <span className={`text-[10px] font-bold ${isActive ? 'text-primary' : 'text-gray-400'}`}>{displayName}</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

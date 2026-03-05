@@ -31,3 +31,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# sensitive files (local only - DO NOT COMMIT)
+src/lib/rmExpress.js
+src/app/inventory-actions.js

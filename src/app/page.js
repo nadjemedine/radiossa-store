@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import SideMenu from '@/components/SideMenu';
@@ -27,8 +27,8 @@ export default function Home() {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [storeFront, setStoreFront] = useState({
-        productsTitle: 'Nos Produits',
-        showProductsTitle: true,
+        productsTitle: '',
+        showProductsTitle: false,
         titleStyle: 'bold-italic',
         titleColor: '#000000',
         showUnderline: true,
@@ -41,12 +41,12 @@ export default function Home() {
             if (!product.inventory || product.inventory.length === 0) {
                 return true;
             }
-            
+
             // If autoHideOutOfStock is explicitly false, show it
             if (product.autoHideOutOfStock === false) {
                 return true;
             }
-            
+
             // Check if at least one variant is in stock
             const hasStock = product.inventory.some(variant => {
                 // If tracking is disabled, consider it in stock
@@ -60,7 +60,7 @@ export default function Home() {
                 // Check actual stock quantity
                 return variant.stock > 0;
             });
-            
+
             return hasStock;
         });
     }, []);
@@ -71,12 +71,12 @@ export default function Home() {
                 setIsLoading(true);
                 // Fetch all products
                 const productsQuery = `*[_type == "product" && !(_id in path("drafts.**"))] | order(_createdAt desc)`;
-                
+
                 const [productsData, storeFrontData] = await Promise.all([
                     client.fetch(productsQuery),
                     client.fetch(`*[_type == "storeFront"][0]`)
                 ]);
-                
+
                 // Filter out of stock products
                 const filteredProducts = filterOutOfStockProducts(productsData);
                 setProducts(filteredProducts);
@@ -94,7 +94,7 @@ export default function Home() {
             }
         }
         fetchData();
-        
+
         // Re-fetch products every 30 seconds to keep inventory updated
         const intervalId = setInterval(async () => {
             try {
@@ -106,7 +106,7 @@ export default function Home() {
                 console.error("Error re-fetching products:", error);
             }
         }, 30000); // 30 seconds
-        
+
         return () => clearInterval(intervalId);
     }, [filterOutOfStockProducts]);
 
@@ -184,7 +184,7 @@ export default function Home() {
                                 }`}
                             style={{ color: storeFront.titleColor || '#000000' }}
                         >
-                            {storeFront.productsTitle || 'Nos Produits'}
+                            {storeFront.productsTitle}
                             {(storeFront.showUnderline !== false) && (
                                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-full"></div>
                             )}

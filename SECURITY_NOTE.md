@@ -166,18 +166,32 @@ git ls-files --others --exclude-standard
 
 ## 🎯 الملفات الحالية في المشروع:
 
-### آمنة ✓:
+### آمنة ✓ (ارفعها):
 - ✅ `schemaTypes/rmExpressSettings.js` - schema فقط
 - ✅ `src/app/api/revalidate/route.js` - webhook بدون أسرار
 - ✅ `src/app/page.js` - منطق الفلترة
-- ✅ `src/app/actions.js` - مبسّط بدون API calls
+- ✅ `src/app/actions.js` - معالجة الطلبات
 
-### محظورة ❌:
-- ❌ `src/lib/rmExpress.js` - حذف
-- ❌ `src/app/inventory-actions.js` - حذف
+### محظورة ❌ (لا ترفعها أبداً):
+- ❌ `src/lib/rmExpress.js` - يحتوي على API token ← **محلي فقط**
+- ❌ `src/app/inventory-actions.js` - منطق المخزون ← **محلي فقط**
 - ❌ `.env.local` - محمي بـ .gitignore
-- ❌ `INVENTORY_GUIDE.md` - حذف
-- ❌ `INVENTORY_UPDATE.md` - حذف
+- ❌ أي ملف يحتوي على "TOKEN", "SECRET", "KEY"
+
+### الإجراء المطلوب:
+```bash
+# 1. أنشئ الملفات المحلية (لا تُرفع)
+src/lib/rmExpress.js
+src/app/inventory-actions.js
+
+# 2. أضفها إلى .gitignore (تم بالفعل)
+echo "src/lib/rmExpress.js" >> .gitignore
+echo "src/app/inventory-actions.js" >> .gitignore
+
+# 3. تأكد قبل الـ commit
+git status
+git diff
+```
 
 ---
 
