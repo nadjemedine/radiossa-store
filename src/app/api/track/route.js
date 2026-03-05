@@ -1,4 +1,4 @@
-import { trackShipment } from '../../../lib/rmExpress.js';
+import { trackShipment } from '@/lib/rmExpress';
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
