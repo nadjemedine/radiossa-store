@@ -1,58 +1,134 @@
-const BASE_URL = process.env.RM_EXPRESS_API_URL || 'https://rmexpress.ecotrack.dz/api/v1';
-const API_TOKEN = process.env.RM_EXPRESS_API_TOKEN;
+import { client } from './sanity.js';
 
-/**
- * Create a new shipment in RM Express system
- * @param {Object} orderData - Order information
- * @returns {Promise<Object>} Shipment result
- */
-export async function createShipment(orderData) {
+const ENV_BASE_URL = process.env.RM_EXPRESS_API_URL || 'https://rmexpress.ecotrack.dz/api/v1';
+const ENV_API_TOKEN = process.env.RM_EXPRESS_API_TOKEN;
+
+function normalizeBaseUrl(url) {
+    const raw = String(url || '').trim();
+    if (!raw) return '';
+    return raw.endsWith('/') ? raw.slice(0, -1) : raw;
+}
+
+async function getSchemaRmExpressConfig() {
     try {
-        if (!API_TOKEN) {
-            console.error('RM Express API token is missing');
-            return {
-                success: false,
-                error: 'API token not configured',
-            };
+        const settings = await client
+            .withConfig({ useCdn: false })
+            .fetch(`*[_type == "rmExpressSettings"][0]{apiUrl, apiToken}`);
+
+        return {
+            baseUrl: normalizeBaseUrl(settings?.apiUrl),
+            apiToken: settings?.apiToken || '',
+        };
+    } catch (error) {
+        console.error('Failed to read rmExpressSettings from Sanity:', error);
+        return { baseUrl: '', apiToken: '' };
+    }
+}
+
+function buildConfigCandidates(schemaConfig) {
+    const envConfig = {
+        source: 'env',
+        baseUrl: normalizeBaseUrl(ENV_BASE_URL),
+        apiToken: ENV_API_TOKEN || '',
+    };
+    const schemaCfg = {
+        source: 'schema',
+        baseUrl: normalizeBaseUrl(schemaConfig?.baseUrl),
+        apiToken: schemaConfig?.apiToken || '',
+    };
+
+    const withCredentials = [envConfig, schemaCfg].filter((cfg) => cfg.baseUrl && cfg.apiToken);
+    const unique = [];
+    const seen = new Set();
+
+    for (const cfg of withCredentials) {
+        const key = `${cfg.baseUrl}::${cfg.apiToken}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(cfg);
         }
+    }
 
-        // تحضير الروابط (Params) حسب توثيق curl
-        const params = new URLSearchParams({
-            reference: orderData.orderId || orderData.reference || '',
-            nom_client: orderData.customerName || orderData.name || '',
-            telephone: orderData.phone || '',
-            telephone_2: orderData.phone2 || '',
-            adresse: orderData.address || '',
-            commune: orderData.commune || '',
-            code_wilaya: orderData.wilaya || '', // تأكد من إرسال كود الولاية إذا كان مطلوباً كرقم
-            montant: orderData.totalPrice || orderData.cod_amount || 0,
-            remarque: orderData.remark || '',
-            produit: orderData.items?.map(item => item.productName).join(', ') || orderData.description || '',
-            type: orderData.type || '1', // 1 للتوصيل العادي غالباً
-            stop_desk: orderData.stop_desk || '0'
-        });
+    return unique;
+}
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+async function sendShipmentWithConfig(orderData, config) {
+    const cleanBaseUrl = normalizeBaseUrl(config.baseUrl);
+    const apiToken = config.apiToken;
 
-        // تأكد من أن BASE_URL ينتهي بـ /api/v1
-        const cleanBaseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
-        const url = `${cleanBaseUrl}/create/order?${params.toString()}`;
+    const productLabel = orderData.productName
+        || orderData.items
+            ?.map((item) => item.productName || item.name)
+            .filter(Boolean)
+            .join(', ')
+        || orderData.description
+        || '';
+    const itemsDetailedRemark = (orderData.items || [])
+        .map((item, index) => {
+            const name = item.productName || item.name || 'N/A';
+            const price = item.price ?? 0;
+            const quantity = item.quantity ?? 1;
+            const color = item.color || 'N/A';
+            const size = item.size || 'N/A';
+            return `${index + 1}) ${name} | Price:${price} | Qty:${quantity} | Color:${color} | Size:${size}`;
+        })
+        .join(' || ');
+    const fallbackRemark = [
+        `ShippingType:${orderData.shippingType || 'N/A'}`,
+        `Wilaya:${orderData.wilayaName || orderData.wilaya || 'N/A'}`,
+        `Commune:${orderData.commune || 'N/A'}`,
+        `ShippingCost:${orderData.shippingCost ?? 'N/A'}`,
+        `Items:${itemsDetailedRemark || 'N/A'}`,
+    ].join(' | ');
+    const orderRemark = orderData.remark || fallbackRemark;
 
-        console.log('🔗 Sending request to:', url);
+    const wilayaRaw = String(orderData.wilaya || '');
+    const wilayaCodeMatch = wilayaRaw.match(/\d+/);
+    const wilayaCode = wilayaCodeMatch ? wilayaCodeMatch[0].padStart(2, '0') : '';
+    const normalizedAddress = orderData.address
+        || [orderData.commune, orderData.wilayaName || orderData.wilaya].filter(Boolean).join(', ');
 
+    const params = new URLSearchParams({
+        reference: orderData.orderId || orderData.reference || '',
+        nom_client: orderData.customerName || orderData.name || '',
+        telephone: orderData.phone || '',
+        telephone_2: orderData.phone2 || '',
+        adresse: normalizedAddress,
+        commune: orderData.commune || '',
+        code_wilaya: wilayaCode,
+        montant: orderData.totalPrice || orderData.cod_amount || 0,
+        remarque: orderRemark,
+        produit: productLabel,
+        type: orderData.type || '1',
+        stop_desk: orderData.stop_desk || '0',
+    });
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const url = `${cleanBaseUrl}/create/order`;
+
+    console.log(`Sending RM Express request to: ${url} (source: ${config.source})`);
+
+    try {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${API_TOKEN}`,
-                'Accept': 'application/json'
+                Authorization: `Bearer ${apiToken}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            signal: controller.signal
+            body: params.toString(),
+            signal: controller.signal,
         });
 
-        clearTimeout(timeoutId);
-
-        const data = await response.json();
+        const rawResponse = await response.text();
+        let data;
+        try {
+            data = rawResponse ? JSON.parse(rawResponse) : {};
+        } catch {
+            data = { message: rawResponse || 'Unexpected non-JSON response from RM Express' };
+        }
 
         if (!response.ok) {
             throw new Error(data.message || 'Failed to create shipment');
@@ -61,46 +137,115 @@ export async function createShipment(orderData) {
         return {
             success: true,
             trackingNumber: data.tracking_number || data.reference || data.id,
-            data: data,
+            data,
+            source: config.source,
+        };
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+export async function createShipment(orderData) {
+    try {
+        const schemaConfig = await getSchemaRmExpressConfig();
+        const configs = buildConfigCandidates(schemaConfig);
+        const attemptedSources = configs.map((cfg) => cfg.source);
+
+        if (configs.length === 0) {
+            return {
+                success: false,
+                error: 'No RM Express configuration found in env or Sanity settings',
+                source: null,
+            };
+        }
+
+        let lastError = null;
+        let lastSource = null;
+
+        for (const config of configs) {
+            try {
+                return await sendShipmentWithConfig(orderData, config);
+            } catch (error) {
+                lastError = error;
+                lastSource = config.source;
+                console.error(`RM Express shipment failed with ${config.source} config:`, error);
+            }
+        }
+
+        return {
+            success: false,
+            error: lastError?.name === 'AbortError'
+                ? 'RM Express API connection timed out'
+                : (lastError?.message || 'Failed to create shipment'),
+            source: lastSource,
+            attemptedSources,
         };
     } catch (error) {
         console.error('RM Express shipment creation error:', error);
         return {
             success: false,
             error: error.name === 'AbortError' ? 'RM Express API connection timed out' : error.message,
+            source: null,
         };
     }
 }
 
 /**
  * Track a shipment by tracking number
- * @param {string} trackingNumber 
+ * @param {string} trackingNumber
  * @returns {Promise<Object>} Tracking status
  */
 export async function trackShipment(trackingNumber) {
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 seconds timeout
+        const schemaConfig = await getSchemaRmExpressConfig();
+        const configs = buildConfigCandidates(schemaConfig);
 
-        const response = await fetch(`${BASE_URL}/tracking/${trackingNumber}`, {
-            headers: {
-                'Authorization': `Bearer ${API_TOKEN}`,
-            },
-            signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-            throw new Error('Tracking information not found');
+        if (configs.length === 0) {
+            return {
+                success: false,
+                error: 'No RM Express configuration found in env or Sanity settings',
+            };
         }
 
-        const data = await response.json();
+        let lastError = null;
+
+        for (const config of configs) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const url = `${normalizeBaseUrl(config.baseUrl)}/tracking/${trackingNumber}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        Authorization: `Bearer ${config.apiToken}`,
+                    },
+                    signal: controller.signal,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Tracking information not found');
+                }
+
+                const data = await response.json();
+                clearTimeout(timeoutId);
+
+                return {
+                    success: true,
+                    status: data.status,
+                    history: data.history,
+                };
+            } catch (error) {
+                clearTimeout(timeoutId);
+                lastError = error;
+                console.error(`RM Express tracking failed with ${config.source} config:`, error);
+            }
+        }
 
         return {
-            success: true,
-            status: data.status,
-            history: data.history,
+            success: false,
+            error: lastError?.name === 'AbortError'
+                ? 'RM Express API connection timed out'
+                : (lastError?.message || 'Tracking information not found'),
         };
     } catch (error) {
         console.error('RM Express tracking error:', error);

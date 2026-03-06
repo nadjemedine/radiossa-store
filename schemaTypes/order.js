@@ -69,6 +69,19 @@ export default {
                     { title: 'Cancelled', value: 'cancelled' }
                 ]
             }
+        },
+        {
+            name: 'rmExpressSource',
+            title: 'RM Express Source',
+            type: 'string',
+            description: 'Configuration source used for RM Express request (env or schema)',
+            options: {
+                list: [
+                    { title: 'Environment (.env)', value: 'env' },
+                    { title: 'Sanity Schema Settings', value: 'schema' }
+                ]
+            },
+            readOnly: true,
         }
     ],
     preview: {

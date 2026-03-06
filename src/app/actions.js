@@ -10,14 +10,47 @@ export async function submitOrder(orderDoc) {
         // Save order to Sanity
         const result = await client.create(orderDoc);
 
+        const wilayaRaw = String(orderDoc.wilaya || '');
+        const wilayaCodeMatch = wilayaRaw.match(/\d+/);
+        const wilayaCode = wilayaCodeMatch ? wilayaCodeMatch[0].padStart(2, '0') : '';
+        const isDeskDelivery = String(orderDoc.shippingType || '').toLowerCase().includes('bureau')
+            || String(orderDoc.shippingType || '').toLowerCase().includes('desk');
+        const normalizedAddress = [orderDoc.commune, orderDoc.wilaya].filter(Boolean).join(', ');
+        const itemsSummary = (orderDoc.items || [])
+            .map((item, index) => {
+                const name = item.productName || item.name || 'N/A';
+                const price = item.price ?? 0;
+                const quantity = item.quantity ?? 1;
+                const color = item.color || 'N/A';
+                const size = item.size || 'N/A';
+                return `${index + 1}) ${name} | Price:${price} | Qty:${quantity} | Color:${color} | Size:${size}`;
+            })
+            .join(' || ');
+        const fullOrderRemark = [
+            `ShippingType:${orderDoc.shippingType || 'N/A'}`,
+            `Wilaya:${orderDoc.wilaya || 'N/A'}`,
+            `Commune:${orderDoc.commune || 'N/A'}`,
+            `Items:${itemsSummary || 'N/A'}`,
+        ].join(' | ');
+
         // Send order to RM Express for delivery
         const rmExpressData = {
             customerName: orderDoc.customerName,
             phone: orderDoc.phone,
-            wilaya: orderDoc.wilaya,
+            wilaya: wilayaCode,
+            wilayaName: orderDoc.wilaya,
             commune: orderDoc.commune,
+            shippingType: orderDoc.shippingType,
+            address: normalizedAddress,
+            stop_desk: isDeskDelivery ? '1' : '0',
             items: orderDoc.items,
+            productName: orderDoc.items
+                ?.map((item) => item.productName || item.name)
+                .filter(Boolean)
+                .join(', '),
             totalPrice: orderDoc.totalPrice,
+            shippingCost: orderDoc.shippingCost,
+            remark: fullOrderRemark,
             orderId: result._id,
         };
 
@@ -25,10 +58,23 @@ export async function submitOrder(orderDoc) {
 
         // Update Sanity order with RM Express tracking number if successful
         if (shipmentResult.success && shipmentResult.trackingNumber) {
-            await client.patch(result._id).set({
+            const rmPatch = {
                 rmExpressTrackingNumber: shipmentResult.trackingNumber,
                 rmExpressStatus: 'created',
-            }).commit();
+            };
+            if (shipmentResult.source) {
+                rmPatch.rmExpressSource = shipmentResult.source;
+            }
+            await client.patch(result._id).set(rmPatch).commit();
+        } else {
+            const rmPatch = {
+                rmExpressStatus: 'failed',
+                rmExpressError: shipmentResult.error || 'Unknown RM Express error',
+            };
+            if (shipmentResult.source) {
+                rmPatch.rmExpressSource = shipmentResult.source;
+            }
+            await client.patch(result._id).set(rmPatch).commit();
         }
 
         // Update product inventory
