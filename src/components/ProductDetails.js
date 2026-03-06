@@ -10,9 +10,38 @@ import ProductCard from './ProductCard';
 export default function ProductDetails({ product, onClose, onNavigate }) {
     const { addToCart } = useCart();
     const [quantity, setQuantity] = useState(1);
-    const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
-    const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || "Standard");
+
+    // Derived values from inventory
+    const inventory = product.inventory || [];
+    const availableColorsSet = new Set();
+    const availableSizesSet = new Set();
+
+    inventory.forEach(variant => {
+        if (variant.color) availableColorsSet.add(variant.color);
+        if (variant.size) availableSizesSet.add(variant.size);
+    });
+
+    const colors = Array.from(availableColorsSet);
+    const sizes = Array.from(availableSizesSet);
+
+    const [selectedColor, setSelectedColor] = useState(colors[0] || null);
+    const [selectedSize, setSelectedSize] = useState(sizes[0] || "Standard");
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [relatedProducts, setRelatedProducts] = useState([]);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+
+    const productImages = product.images || (product.image ? [product.image] : []);
+    const currentImageUrl = productImages[currentImageIndex]
+        ? urlFor(productImages[currentImageIndex]).width(1200).url()
+        : '/placeholder.png';
+
+    // Check if the current combination is in stock
+    const currentVariant = inventory.find(v =>
+        (v.size === selectedSize || (!v.size && selectedSize === "Standard")) &&
+        (v.color === selectedColor || !v.color)
+    );
+    const isOutOfStock = currentVariant ? currentVariant.stock <= 0 : (inventory.length > 0 ? true : false);
 
     useEffect(() => {
         const fetchRelated = async () => {
@@ -21,28 +50,23 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                 let params = { prodId: product._id };
 
                 if (product.categoryId) {
-                    // Try fetching from same category first
                     query = `*[_type == "product" && category._ref == $catId && _id != $prodId][0...6] {
-                        _id, name, price, comparePrice, image, slug, "categoryId": category._ref
+                        _id, name, price, comparePrice, image, images, slug, "categoryId": category._ref
                     }`;
                     params.catId = product.categoryId;
                 } else {
-                    // Just fetch any other products
                     query = `*[_type == "product" && _id != $prodId][0...6] {
-                        _id, name, price, comparePrice, image, slug, "categoryId": category._ref
+                        _id, name, price, comparePrice, image, images, slug, "categoryId": category._ref
                     }`;
                 }
 
                 let data = await client.fetch(query, params);
-
-                // If no related products found in category, get any others
                 if (data.length === 0 && product.categoryId) {
                     const fallbackQuery = `*[_type == "product" && _id != $prodId][0...6] {
-                        _id, name, price, comparePrice, image, slug, "categoryId": category._ref
+                        _id, name, price, comparePrice, image, images, slug, "categoryId": category._ref
                     }`;
                     data = await client.fetch(fallbackQuery, { prodId: product._id });
                 }
-
                 setRelatedProducts(data);
             } catch (error) {
                 console.error("Error fetching related products", error);
@@ -52,6 +76,8 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
     }, [product]);
 
     const handleAddToCart = () => {
+        if (isOutOfStock) return;
+
         for (let i = 0; i < quantity; i++) {
             addToCart({
                 ...product,
@@ -60,6 +86,29 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
             });
         }
         onClose();
+    };
+
+    // Swipe handlers
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe && productImages.length > 1) {
+            setCurrentImageIndex((prev) => (prev + 1) % productImages.length);
+        } else if (isRightSwipe && productImages.length > 1) {
+            setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
+        }
     };
 
     return (
@@ -75,23 +124,50 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
 
             <main className="pb-32">
                 {/* Image Section */}
-                <div className="relative aspect-[4/5] w-full bg-gray-50">
+                <div
+                    className="relative aspect-[4/5] w-full bg-gray-50 overflow-hidden touch-pan-y"
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                >
                     <Image
-                        src={urlFor(product.image).width(1200).url()}
+                        src={currentImageUrl}
                         alt={product.name}
                         fill
-                        className="object-cover"
+                        className="object-cover pointer-events-none"
                         priority={true}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
                         quality={75}
                     />
+
+                    {/* Thumbnails Overlay */}
+                    {productImages.length > 1 && (
+                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 px-4">
+                            {productImages.map((img, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setCurrentImageIndex(idx)}
+                                    className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${currentImageIndex === idx ? 'border-primary scale-110 shadow-lg' : 'border-white/50 backdrop-blur-sm'}`}
+                                >
+                                    <Image
+                                        src={urlFor(img).width(100).url()}
+                                        alt={`${product.name} thumbnail ${idx}`}
+                                        width={48}
+                                        height={48}
+                                        className="object-cover w-full h-full"
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
                 </div>
 
                 {/* Content Container */}
                 <div className="px-6 py-8 space-y-8 bg-white -mt-4 rounded-t-3xl relative z-10">
                     <div className="space-y-2">
-                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">{product.name}</h1>
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight leading-tight">{product.name}</h1>
                         <div className="flex items-baseline gap-2">
                             <div className="space-y-2">
                                 <p className="text-gray-900 text-3xl font-black">
@@ -108,7 +184,7 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                 </p>
                                 {product.comparePrice && (
                                     <div className="text-sm bg-red-500 text-white px-3 py-1 rounded-full inline-block font-bold">
-                                        Save {(Math.round((1 - product.price / product.comparePrice) * 100))}%
+                                        -{Math.round((1 - product.price / product.comparePrice) * 100)}%
                                     </div>
                                 )}
                             </div>
@@ -119,23 +195,25 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                     <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                         <div className="flex-shrink-0 flex items-center gap-2 bg-primary/10 px-4 py-3 rounded-2xl border border-primary/20">
                             <ShieldCheck size={18} className="text-primary" />
-                            <span className="text-[12px] font-bold text-gray-700 whitespace-nowrap">Paiement à la livraison</span>
+                            <span className="text-[12px] font-bold text-gray-700 whitespace-nowrap">الدفع عند الاستلام</span>
+                        </div>
+                        <div className="flex-shrink-0 flex items-center gap-2 bg-green-50 px-4 py-3 rounded-2xl border border-green-100">
+                            <Truck size={18} className="text-green-600" />
+                            <span className="text-[12px] font-bold text-gray-700 whitespace-nowrap text-right">توصيل سريع</span>
                         </div>
                     </div>
 
                     {/* Selection Options */}
                     <div className="grid grid-cols-1 gap-6">
-                        {product.colors && product.colors.length > 0 && (
+                        {colors.length > 0 && (
                             <div className="space-y-4">
-                                <h3 className="font-bold text-gray-900">Couleur</h3>
+                                <h3 className="font-bold text-gray-900">اللون</h3>
                                 <div className="flex flex-wrap gap-3">
-                                    {product.colors.map(colorStr => {
-                                        // Support "Name|Color" or "Name:Color" format (e.g. "أحمر|#ff0000")
+                                    {colors.map(colorStr => {
                                         const parts = colorStr.includes('|') ? colorStr.split('|') : colorStr.includes(':') ? colorStr.split(':') : [colorStr];
                                         const displayName = parts[0].trim();
                                         const rawColor = parts.length > 1 ? parts[1].trim() : parts[0].trim();
 
-                                        // Mapping Arabic/English names to CSS colors for common cases
                                         const colorMap = {
                                             'أسود': '#000000', 'Black': '#000000', 'noir': '#000000',
                                             'أبيض': '#FFFFFF', 'White': '#FFFFFF', 'blanc': '#FFFFFF',
@@ -178,33 +256,44 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                             </div>
                         )}
 
-                        <div className="space-y-4">
-                            <h3 className="font-bold text-gray-900">Taille</h3>
-                            <div className="flex flex-wrap gap-3">
-                                {(product.sizes && product.sizes.length > 0 ? product.sizes : ["Standard"]).map(size => (
-                                    <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
-                                        className={`min-w-[50px] px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${selectedSize === size ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'}`}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
+                        {sizes.length > 0 && (
+                            <div className="space-y-4">
+                                <h3 className="font-bold text-gray-900">المقاس</h3>
+                                <div className="flex flex-wrap gap-3">
+                                    {sizes.map(size => (
+                                        <button
+                                            key={size}
+                                            onClick={() => setSelectedSize(size)}
+                                            className={`min-w-[50px] px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${selectedSize === size ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'}`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
+                    {/* Stock Status */}
+                    {isOutOfStock && (
+                        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
+                            <p className="text-red-500 font-bold text-center text-sm">عذراً، هذا الخيار غير متوفر حالياً</p>
+                        </div>
+                    )}
+
                     {/* Description */}
-                    <div className="space-y-3 bg-gray-50/50 p-5 rounded-3xl border border-gray-100">
-                        <h3 className="font-bold text-gray-900">Description du produit</h3>
-                        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                            {product.description || "Aucune description disponible pour ce produit."}
-                        </p>
-                    </div>
+                    {product.description && (
+                        <div className="space-y-3 bg-gray-50/50 p-5 rounded-3xl border border-gray-100">
+                            <h3 className="font-bold text-gray-900">وصف المنتج</h3>
+                            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line text-right">
+                                {product.description}
+                            </p>
+                        </div>
+                    )}
 
                     {/* Quantity Selector */}
                     <div className="flex items-center justify-between p-5 bg-gray-50/50 rounded-3xl border border-gray-100">
-                        <span className="font-bold text-gray-900">Quantité</span>
+                        <span className="font-bold text-gray-900">الكمية</span>
                         <div className="flex items-center gap-6">
                             <button
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -226,21 +315,19 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                     {relatedProducts.length > 0 && (
                         <div className="pt-8 space-y-6">
                             <div className="flex flex-col items-center">
-                                <h3 className="text-xl font-light tracking-[0.2em] text-gray-900 uppercase">PRODUITS SIMILAIRES</h3>
+                                <h3 className="text-xl font-light tracking-[0.2em] text-gray-900 uppercase">منتجات مشابهة</h3>
                                 <div className="w-12 h-[1px] bg-primary mt-2"></div>
                             </div>
                             <div className="flex gap-4 overflow-x-auto pb-8 scrollbar-hide -mx-6 px-6">
                                 {relatedProducts.map(relProd => (
                                     <div key={relProd._id} className="min-w-[150px] w-[150px] flex-shrink-0">
-                                        <div className="min-w-[150px] w-[150px] flex-shrink-0">
-                                            <ProductCard
-                                                product={relProd}
-                                                onClick={() => {
-                                                    onNavigate(relProd);
-                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                }}
-                                            />
-                                        </div>
+                                        <ProductCard
+                                            product={relProd}
+                                            onClick={() => {
+                                                onNavigate(relProd);
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                        />
                                     </div>
                                 ))}
                             </div>
@@ -254,10 +341,11 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                 <div className="max-w-md mx-auto">
                     <button
                         onClick={handleAddToCart}
-                        className="w-full bg-primary text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 active:scale-95 transition-all uppercase tracking-[0.1em]"
+                        disabled={isOutOfStock}
+                        className={`w-full text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all uppercase tracking-[0.1em] ${isOutOfStock ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary shadow-primary/30'}`}
                     >
                         <ShoppingBag size={22} strokeWidth={2.5} />
-                        COMMANDER MAINTENANT
+                        {isOutOfStock ? 'غير متوفر' : 'اطلب الآن'}
                     </button>
                 </div>
             </div>

@@ -5,40 +5,23 @@ export default {
     fields: [
         {
             name: 'name',
-            title: 'Name',
+            title: 'اسم المنتج',
             type: 'string',
+            validation: Rule => Rule.required(),
         },
         {
             name: 'slug',
-            title: 'Slug',
+            title: 'Slug (الرابط)',
             type: 'slug',
             options: {
                 source: 'name',
                 maxLength: 96,
             },
-        },
-        {
-            name: 'price',
-            title: 'Price',
-            type: 'number',
-        },
-        {
-            name: 'comparePrice',
-            title: 'Compare Price (Discounted Price)',
-            type: 'number',
-            description: 'Original price for comparison (used to show discount)',
-        },
-        {
-            name: 'image',
-            title: 'Image',
-            type: 'image',
-            options: {
-                hotspot: true,
-            },
+            validation: Rule => Rule.required(),
         },
         {
             name: 'images',
-            title: 'Product Images',
+            title: 'صور المنتج',
             type: 'array',
             of: [
                 {
@@ -48,68 +31,49 @@ export default {
                     },
                 },
             ],
-            description: 'Add multiple product images',
+            description: 'أضف جميع صور المنتج هنا. سيتم عرضها كمعرض صور.',
+            validation: Rule => Rule.required().min(1),
         },
         {
-            name: 'description',
-            title: 'Description',
-            type: 'text',
+            name: 'price',
+            title: 'السعر الحالي',
+            type: 'number',
+            validation: Rule => Rule.required(),
         },
         {
-            name: 'colors',
-            title: 'Available Colors',
-            type: 'array',
-            of: [{ type: 'string' }],
-            options: {
-                layout: 'tags'
-            }
+            name: 'comparePrice',
+            title: 'السعر القديم (للتخفيض)',
+            type: 'number',
+            description: 'السعر الأصلي قبل التخفيض ليظهر مشطوباً',
         },
         {
             name: 'inventory',
-            title: 'Inventory Management',
+            title: 'المخزون والخيارات (المقاس واللون)',
+            description: 'أدخل هنا كل مقاس ولون مع الكمية الخاصة به',
             type: 'array',
             of: [
                 {
                     type: 'object',
+                    name: 'variant',
+                    title: 'خيار المنتج',
                     fields: [
                         {
                             name: 'size',
-                            title: 'Size',
+                            title: 'المقاس',
                             type: 'string',
-                            description: 'Size name (e.g., S, M, L, XL)',
+                            description: 'مثال: M, L, XL أو 42, 43',
                         },
                         {
                             name: 'color',
-                            title: 'Color',
+                            title: 'اللون',
                             type: 'string',
-                            description: 'Color name (optional)',
+                            description: 'مثال: أحمر أو أسود|#000000',
                         },
                         {
                             name: 'stock',
-                            title: 'Stock Quantity',
+                            title: 'الكمية المتوفرة',
                             type: 'number',
-                            description: 'Number of items in stock',
                             initialValue: 0,
-                        },
-                        {
-                            name: 'sku',
-                            title: 'SKU',
-                            type: 'string',
-                            description: 'Stock Keeping Unit (optional)',
-                        },
-                        {
-                            name: 'trackInventory',
-                            title: 'Track Inventory',
-                            type: 'boolean',
-                            description: 'Enable inventory tracking for this variant',
-                            initialValue: true,
-                        },
-                        {
-                            name: 'allowBackorder',
-                            title: 'Allow Backorder',
-                            type: 'boolean',
-                            description: 'Allow customers to order when out of stock',
-                            initialValue: false,
                         },
                     ],
                     preview: {
@@ -120,25 +84,31 @@ export default {
                         },
                         prepare({ size, color, stock }) {
                             return {
-                                title: `${size} ${color ? `- ${color}` : ''}`,
-                                subtitle: `Stock: ${stock}`,
+                                title: `${size || 'بدون مقاس'} ${color ? `- ${color}` : ''}`,
+                                subtitle: `الكمية: ${stock}`,
                             };
                         },
                     },
                 },
             ],
+            validation: Rule => Rule.required().min(1),
+        },
+        {
+            name: 'description',
+            title: 'وصف المنتج',
+            type: 'text',
         },
         {
             name: 'category',
-            title: 'Catégorie',
+            title: 'التصنيف',
             type: 'reference',
             to: [{ type: 'category' }]
         },
         {
             name: 'autoHideOutOfStock',
-            title: 'Auto-hide Out of Stock',
+            title: 'إخفاء تلقائي عند نفاد المخزون',
             type: 'boolean',
-            description: 'Automatically hide product when all variants are out of stock',
+            description: 'إخفاء المنتج من المتجر عندما تنفد جميع الكميات',
             initialValue: true,
         },
     ],

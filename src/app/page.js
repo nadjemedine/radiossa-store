@@ -37,31 +37,22 @@ export default function Home() {
     // Function to filter out of stock products
     const filterOutOfStockProducts = useCallback((productsData) => {
         return productsData.filter(product => {
-            // If product has no inventory or autoHide is disabled, show it
-            if (!product.inventory || product.inventory.length === 0) {
-                return true;
-            }
-
-            // If autoHideOutOfStock is explicitly false, show it
+            // Respect the autoHideOutOfStock flag
             if (product.autoHideOutOfStock === false) {
                 return true;
             }
 
-            // Check if at least one variant is in stock
-            const hasStock = product.inventory.some(variant => {
-                // If tracking is disabled, consider it in stock
-                if (!variant.trackInventory) {
-                    return true;
-                }
-                // If backorder is allowed, consider it available
-                if (variant.allowBackorder) {
-                    return true;
-                }
-                // Check actual stock quantity
-                return variant.stock > 0;
-            });
+            // Check variant inventory (Primary model)
+            if (product.inventory && Array.isArray(product.inventory) && product.inventory.length > 0) {
+                const hasVariantStock = product.inventory.some(variant => (variant.stock || 0) > 0);
+                if (!hasVariantStock) return false;
+            }
+            // Fallback for simple stock if legacy field exists
+            else if (typeof product.stock === 'number' && product.stock <= 0) {
+                return false;
+            }
 
-            return hasStock;
+            return true;
         });
     }, []);
 

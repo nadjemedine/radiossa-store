@@ -149,11 +149,14 @@ export default function CheckoutForm({ onSuccess }) {
                     VOTRE PANIER ({cart.length})
                 </h2>
                 <div className="divide-y divide-gray-50">
-                    {cart.map((item) => (
+                    {cart.map((item) => {
+                        const cartImage = item?.images?.[0] || item?.image;
+                        const cartImageUrl = cartImage ? urlFor(cartImage).width(200).url() : '/placeholder.png';
+                        return (
                         <div key={item._id} className="py-4 flex gap-4">
                             <div className="relative w-20 h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
                                 <Image
-                                    src={urlFor(item.image).width(200).url()}
+                                    src={cartImageUrl}
                                     alt={item.name}
                                     fill
                                     className="object-cover"
@@ -193,7 +196,7 @@ export default function CheckoutForm({ onSuccess }) {
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center">

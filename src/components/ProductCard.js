@@ -4,21 +4,57 @@ import { Heart } from 'lucide-react';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity';
 import { useCart } from '@/lib/cart-context';
+import { useState } from 'react';
 
 export default function ProductCard({ product, onClick, priority = false }) {
     const { addToCart } = useCart();
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
 
-    // Memoize image URL to prevent recalculation
-    const imageUrl = urlFor(product.image).width(600).url();
+    const productImages = product?.images || (product?.image ? [product.image] : []);
+    const currentImage = productImages[currentImageIndex];
+    const imageUrl = currentImage ? urlFor(currentImage).width(600).url() : '/placeholder.png';
+
+    // Swipe handlers
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+    const onTouchEnd = (e) => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe || isRightSwipe) {
+            e.stopPropagation(); // Prevent clicking/navigating when swiping
+            if (isLeftSwipe && productImages.length > 1) {
+                setCurrentImageIndex((prev) => (prev + 1) % productImages.length);
+            } else if (isRightSwipe && productImages.length > 1) {
+                setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
+            }
+        }
+    };
 
     return (
         <div className="bg-white group cursor-pointer" onClick={onClick}>
-            <div className="relative aspect-[3/4] w-full mb-3 overflow-hidden bg-gray-50 rounded-lg">
+            <div
+                className="relative aspect-[3/4] w-full mb-3 overflow-hidden bg-gray-50 rounded-lg touch-pan-y"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+            >
                 <Image
                     src={imageUrl}
                     alt={product.name}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 200px"
                     priority={priority}
                     quality={75}
@@ -28,6 +64,18 @@ export default function ProductCard({ product, onClick, priority = false }) {
                 <button className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full text-gray-400 hover:text-primary transition-colors">
                     <Heart size={18} />
                 </button>
+
+                {/* Dots indicator for swiping */}
+                {productImages.length > 1 && (
+                    <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                        {productImages.map((_, idx) => (
+                            <div
+                                key={idx}
+                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'bg-primary w-3' : 'bg-white/50'}`}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
             <div className="space-y-1 px-1">
                 <h3 className="text-[13px] font-medium text-gray-900 leading-tight line-clamp-2">{product.name}</h3>
@@ -46,7 +94,7 @@ export default function ProductCard({ product, onClick, priority = false }) {
                     </p>
                     {product.comparePrice && (
                         <div className="text-[10px] bg-red-500 text-white px-2 py-1 rounded-full inline-block font-bold">
-                            {(Math.round((1 - product.price / product.comparePrice) * 100))}% OFF
+                            خصم {(Math.round((1 - product.price / product.comparePrice) * 100))}%
                         </div>
                     )}
                 </div>
@@ -57,7 +105,7 @@ export default function ProductCard({ product, onClick, priority = false }) {
                     }}
                     className="w-full mt-2 bg-primary text-white text-[11px] font-bold py-2.5 rounded hover:opacity-90 transition-all uppercase tracking-wider"
                 >
-                    AJOUTER AU PANIER
+                    أضف إلى السلة
                 </button>
             </div>
         </div>
