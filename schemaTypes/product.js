@@ -37,6 +37,20 @@ export default {
             },
         },
         {
+            name: 'images',
+            title: 'Product Images',
+            type: 'array',
+            of: [
+                {
+                    type: 'image',
+                    options: {
+                        hotspot: true,
+                    },
+                },
+            ],
+            description: 'Add multiple product images',
+        },
+        {
             name: 'description',
             title: 'Description',
             type: 'text',
