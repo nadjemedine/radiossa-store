@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Search, ShoppingBag, Menu } from 'lucide-react';
 import { client } from '@/lib/sanity';
+import { urlFor } from '@/lib/sanity';
 import { useCart } from '@/lib/cart-context';
 
 export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClick, onSearchClick, onCategorySelect, activeCategoryId }) {
@@ -112,14 +113,14 @@ export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClic
         <>
             {/* Top Bar Banner with Marquee Animation */}
             <div className="bg-white text-primary text-[12px] py-2 border-b border-gray-50 uppercase font-bold italic tracking-wider relative overflow-hidden h-[30px] flex items-center">
-                <div className="animate-marquee whitespace-nowrap min-w-full">
-                    Bienvenue a Radiossa Shop &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Livraison 58 Wilaya &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Paiement à la livraison &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bienvenue a Radiossa Shop &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Livraison 58 Wilaya &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Paiement à la livraison &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div className="animate-marquee whitespace-nowrap min-now-full">
+                    Bienvenue à Radiossa Shop &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Livraison 58 Wilayas &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Paiement à la livraison &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bienvenue à Radiossa Shop &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Livraison 58 Wilayas &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Paiement à la livraison &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
 
             <header className="sticky top-0 z-50 bg-white border-b border-gray-100 flex flex-col">
                 {/* Main Header Row */}
-                <div className="px-4 py-5 flex justify-between items-center relative max-w-md mx-auto w-full">
+                <div className="px-4 py-5 flex justify-between items-center relative max-w-6xl mx-auto w-full">
                     {/* Left Icon (Menu Toggle) */}
                     <div className="flex-1 flex justify-start items-center">
                         <button onClick={onMenuClick} className="p-1 -ml-1 hover:bg-gray-50 rounded-full transition-colors duration-200">
@@ -178,9 +179,9 @@ export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClic
                     </div>
                 </div>
 
-                {/* Categories Bar (The Menu Bar) */}
-                {categories.length > 0 && (
-                    <div className="flex flex-col bg-white border-t border-gray-50/50">
+                {/* Categories Bar (The Menu Bar) - Responsive */}
+                {categories.length > 0 && activeTab !== 'cart' && (
+                    <div className="flex flex-col bg-white border-t border-gray-50/50 w-full">
                         {/* Collections Section Heading */}
                         {(settings.showCollectionsHeading !== false && settings.collectionsHeading) && (
                             <div className="px-4 pt-3 pb-1"
@@ -203,8 +204,9 @@ export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClic
                             </div>
                         )}
 
-                        <div className="flex bg-white overflow-x-auto no-scrollbar py-2">
-                            <div className="flex items-center gap-3 px-4 min-w-full">
+                        {/* Scrollable Categories Container */}
+                        <div className="w-full overflow-x-auto overflow-y-hidden no-scrollbar bg-white">
+                            <div className="flex items-center gap-2 sm:gap-3 px-4 py-2 sm:py-3 min-w-max">
                                 {/* "All" Category */}
                                 <button
                                     onClick={() => {
@@ -212,7 +214,7 @@ export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClic
                                             onCategorySelect(null);
                                         }
                                     }}
-                                    className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${!activeCategoryId
+                                    className={`flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 flex-shrink-0 ${!activeCategoryId
                                         ? 'bg-primary text-white scale-105 shadow-lg shadow-primary/20'
                                         : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
                                         }`}
@@ -229,7 +231,7 @@ export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClic
                                                 onCategorySelect({ id: category._id, name: category.name });
                                             }
                                         }}
-                                        className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeCategoryId === category._id
+                                        className={`flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 flex-shrink-0 ${activeCategoryId === category._id
                                             ? 'bg-primary text-white scale-105 shadow-lg shadow-primary/20'
                                             : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
                                             }`}
@@ -238,7 +240,7 @@ export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClic
                                             <img
                                                 src={urlFor(category.icon).url()}
                                                 alt=""
-                                                className={`w-4 h-4 object-contain ${activeCategoryId === category._id ? 'brightness-0 invert' : ''}`}
+                                                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain ${activeCategoryId === category._id ? 'brightness-0 invert' : ''}`}
                                             />
                                         )}
                                         {category.name}

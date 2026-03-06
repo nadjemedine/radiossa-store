@@ -48,7 +48,7 @@ export default function Footer() {
             className="py-12 px-4 mt-0 pt-0"
             style={{ backgroundColor: backgroundColor }}
         >
-            <div className="max-w-md mx-auto">
+            <div className="max-w-6xl mx-auto">
                 <div
                     className="mb-0 pb-0"
                     style={{ textAlign: titleAlignment }}
@@ -204,7 +204,7 @@ export default function Footer() {
                     >
                         {footerData.copyrightText}
                         <div className="mt-2 flex justify-center items-center gap-1 opacity-80 font-bold">
-                            <span>Powered BY</span>
+                            <span>Propulsé par</span>
                             <a
                                 href="https://www.instagram.com/nadjem__eddine/"
                                 target="_blank"

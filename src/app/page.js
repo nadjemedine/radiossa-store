@@ -119,7 +119,7 @@ export default function Home() {
 
     return (
         <div
-            className="max-w-md mx-auto min-h-screen bg-background relative overflow-x-hidden"
+            className="max-w-6xl mx-auto min-h-screen bg-background relative overflow-x-hidden"
         >
             {/* Background overlay for better content readability */}
             <div className="absolute inset-0 bg-white/80"></div>
@@ -188,7 +188,7 @@ export default function Home() {
                         <div>
                             {/* Category Filter Indicator */}
                             {selectedCategory && (
-                                <div className="mb-6 flex items-center justify-between bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                <div className="mb-6 flex items-center justify-between bg-primary/5 p-4 rounded-2xl border border-primary/10 max-w-2xl mx-auto">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
                                             <ChevronRight size={20} />
@@ -209,7 +209,7 @@ export default function Home() {
 
                             {/* Search Input when search mode is active */}
                             {showSearchResults && (
-                                <div className="mb-4">
+                                <div className="mb-4 max-w-2xl mx-auto">
                                     <input
                                         type="text"
                                         placeholder="Rechercher des produits..."
@@ -231,7 +231,7 @@ export default function Home() {
 
 
                             {/* Products Grid */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                                 {isLoading ? (
                                     <>
                                         <ProductSkeleton />
@@ -273,13 +273,21 @@ export default function Home() {
                             </div>
                         </div>
                     ) : activeTab === 'thanks' ? (
-                        <ThankYou onReturnToStore={() => setActiveTab('store')} />
+                        <div className="max-w-2xl mx-auto">
+                            <ThankYou onReturnToStore={() => setActiveTab('store')} />
+                        </div>
                     ) : activeTab === 'tracking' ? (
-                        <SuiviCommandePage />
+                        <div className="max-w-4xl mx-auto">
+                            <SuiviCommandePage />
+                        </div>
                     ) : activeTab === 'contact' ? (
-                        <ContactPage />
+                        <div className="max-w-4xl mx-auto">
+                            <ContactPage />
+                        </div>
                     ) : (
-                        <CheckoutForm onSuccess={() => setActiveTab('thanks')} />
+                        <div className="max-w-4xl mx-auto">
+                            <CheckoutForm onSuccess={() => setActiveTab('thanks')} />
+                        </div>
                     )}
                 </main>
 

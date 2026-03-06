@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'الفخامة';
+export const alt = 'Radiossa Clothing';
 export const size = {
   width: 1200,
   height: 630,
@@ -34,7 +34,7 @@ export default async function Image() {
             margin: '0 0 20px 0',
           }}
         >
-          Radiossa Clothing | الفخامة
+          Radiossa Clothing | Élégance & Style
         </h1>
         <p
           style={{
@@ -43,7 +43,7 @@ export default async function Image() {
             maxWidth: '800px',
           }}
         >
-          أفضل الملابس العصرية في الجزائر
+          La meilleure mode contemporaine en Algérie.
         </p>
       </div>
     ),

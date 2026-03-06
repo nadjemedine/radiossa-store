@@ -83,19 +83,42 @@ export default function CheckoutForm({ onSuccess }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!selectedWilaya) {
-            alert("Veuillez sélectionner une wilaya valide.");
+        const wilayaText = wilayaInput.trim();
+        if (!wilayaText) {
+            alert("Veuillez saisir la wilaya.");
+            return;
+        }
+
+        // Validate phone number format (basic validation)
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+            alert("Veuillez entrer un numéro de téléphone valide (10 chiffres).");
             return;
         }
 
         setIsSubmitting(true);
 
         try {
+            // Try to extract wilaya code from input or selected wilaya
+            let extractedWilayaCode = '';
+
+            // If a wilaya is selected, use its code
+            if (selectedWilaya) {
+                extractedWilayaCode = String(selectedWilaya.id).padStart(2, '0');
+            } else {
+                // Try to extract code from typed text (e.g., "16 - Alger" or just "16")
+                const codeMatch = wilayaText.match(/^(\d{1,2})/);
+                if (codeMatch) {
+                    extractedWilayaCode = codeMatch[1].padStart(2, '0');
+                }
+            }
+
             const orderDoc = {
                 _type: 'order',
                 customerName: formData.name,
                 phone: formData.phone,
-                wilaya: `${String(selectedWilaya.id).padStart(2, '0')} - ${selectedWilaya.nameFr}`,
+                wilaya: wilayaText,  // Submit as-is, even if misspelled
+                wilayaCode: extractedWilayaCode,
                 commune: formData.commune,
                 shippingType: formData.shippingType === 'home' ? 'Domicile' : 'Bureau',
                 items: cart.map(item => ({
@@ -111,8 +134,12 @@ export default function CheckoutForm({ onSuccess }) {
                 status: 'pending'
             };
 
+            console.log('Submitting order:', orderDoc);
+
             // Call Server Action instead of client-side libs
             const result = await submitOrder(orderDoc);
+
+            console.log('Order submission result:', result);
 
             if (result.success) {
                 clearCart();
@@ -122,7 +149,9 @@ export default function CheckoutForm({ onSuccess }) {
             }
         } catch (error) {
             console.error("Order submission error:", error);
-            alert("Une erreur est survenue lors de l'envoi de la commande. Veuillez réessayer.");
+            // Show more specific error message
+            const errorMessage = error.message || "Une erreur est survenue lors de l'envoi de la commande.";
+            alert(`Erreur: ${errorMessage}\n\nVeuillez réessayer ou nous contacter directement.`);
         } finally {
             setIsSubmitting(false);
         }
@@ -153,50 +182,51 @@ export default function CheckoutForm({ onSuccess }) {
                         const cartImage = item?.images?.[0] || item?.image;
                         const cartImageUrl = cartImage ? urlFor(cartImage).width(200).url() : '/placeholder.png';
                         return (
-                        <div key={item._id} className="py-4 flex gap-4">
-                            <div className="relative w-20 h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
-                                <Image
-                                    src={cartImageUrl}
-                                    alt={item.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="flex-1 flex flex-col justify-between py-1">
-                                <div>
-                                    <h4 className="font-bold text-gray-900 text-sm line-clamp-1">{item.name}</h4>
-                                    <p className="text-[10px] text-gray-400 font-medium">
-                                        {item.selectedSize && `Taille: ${item.selectedSize}`}
-                                        {item.selectedColor && ` • Couleur: ${item.selectedColor}`}
-                                    </p>
-                                    <p className="text-gray-900 font-black text-sm mt-1">{item.price.toLocaleString()} DA</p>
+                            <div key={item._id} className="py-4 flex gap-4">
+                                <div className="relative w-20 h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
+                                    <Image
+                                        src={cartImageUrl}
+                                        alt={item.name}
+                                        fill
+                                        className="object-cover"
+                                    />
                                 </div>
-                                <div className="flex items-center justify-between mt-2">
-                                    <div className="flex items-center gap-4 bg-gray-50 rounded-full px-3 py-1 scale-90 -ml-2">
+                                <div className="flex-1 flex flex-col justify-between py-1">
+                                    <div>
+                                        <h4 className="font-bold text-gray-900 text-sm line-clamp-1">{item.name}</h4>
+                                        <p className="text-[10px] text-gray-400 font-medium">
+                                            {item.selectedSize && `Taille: ${item.selectedSize}`}
+                                            {item.selectedColor && ` • Couleur: ${item.selectedColor}`}
+                                        </p>
+                                        <p className="text-gray-900 font-black text-sm mt-1">{item.price.toLocaleString()} DA</p>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <div className="flex items-center gap-4 bg-gray-50 rounded-full px-3 py-1 scale-90 -ml-2">
+                                            <button
+                                                onClick={() => updateQuantity(item._id, -1)}
+                                                className="text-gray-400 hover:text-gray-900"
+                                            >
+                                                <Minus size={16} />
+                                            </button>
+                                            <span className="font-bold text-xs">{item.quantity}</span>
+                                            <button
+                                                onClick={() => updateQuantity(item._id, 1)}
+                                                className="text-gray-400 hover:text-gray-900"
+                                            >
+                                                <Plus size={16} />
+                                            </button>
+                                        </div>
                                         <button
-                                            onClick={() => updateQuantity(item._id, -1)}
-                                            className="text-gray-400 hover:text-gray-900"
+                                            onClick={() => removeFromCart(item._id)}
+                                            className="text-gray-300 hover:text-red-500 transition-colors"
                                         >
-                                            <Minus size={16} />
-                                        </button>
-                                        <span className="font-bold text-xs">{item.quantity}</span>
-                                        <button
-                                            onClick={() => updateQuantity(item._id, 1)}
-                                            className="text-gray-400 hover:text-gray-900"
-                                        >
-                                            <Plus size={16} />
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
-                                    <button
-                                        onClick={() => removeFromCart(item._id)}
-                                        className="text-gray-300 hover:text-red-500 transition-colors"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
                                 </div>
                             </div>
-                        </div>
-                    )})}
+                        )
+                    })}
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center">
@@ -207,7 +237,7 @@ export default function CheckoutForm({ onSuccess }) {
 
             {/* Checkout Form */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-50 text-left">
-                <h2 className="text-center text-primary text-xl font-black mb-6 uppercase tracking-widest">INFOS DE LIVRAISON</h2>
+                <h2 className="text-center text-primary text-xl font-black mb-6 uppercase tracking-widest">INFORMATIONS DE LIVRAISON</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -329,7 +359,7 @@ export default function CheckoutForm({ onSuccess }) {
 
                     <button
                         type="submit"
-                        disabled={isSubmitting || !selectedWilaya}
+                        disabled={isSubmitting}
                         className="w-full bg-primary text-white py-5 rounded-full font-black text-lg mt-4 shadow-xl shadow-primary/30 active:scale-95 transition-all uppercase tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? 'ENVOI EN COURS...' : 'CONFIRMER LA COMMANDE'}
@@ -339,3 +369,4 @@ export default function CheckoutForm({ onSuccess }) {
         </div>
     );
 }
+

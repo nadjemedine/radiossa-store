@@ -29,7 +29,7 @@ export default function SuiviCommandePage() {
                     lastUpdate: new Date().toLocaleDateString('fr-DZ'),
                 });
             } else {
-                alert('Désolé, nous n\'avons نتج أي معلومات لهذا الرقم. يرجى التأكد منه.');
+                alert('Désolé, nous n\'avons trouvé aucune information pour ce numéro. Veuillez vérifier votre saisie.');
             }
         } catch (error) {
             console.error('Tracking error:', error);
@@ -77,9 +77,9 @@ export default function SuiviCommandePage() {
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-gray-900">Commande #{orderStatus.id}</h2>
                             <div className={`px-3 py-1 rounded-full text-xs font-bold ${orderStatus.status === 'Livrée' ? 'bg-green-100 text-green-800' :
-                                    orderStatus.status === 'En cours de livraison' ? 'bg-blue-100 text-blue-800' :
-                                        orderStatus.status === 'Expédiée' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-gray-100 text-gray-800'
+                                orderStatus.status === 'En cours de livraison' ? 'bg-blue-100 text-blue-800' :
+                                    orderStatus.status === 'Expédiée' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-gray-100 text-gray-800'
                                 }`}>
                                 {orderStatus.status}
                             </div>
@@ -88,7 +88,7 @@ export default function SuiviCommandePage() {
                         <div className="space-y-4">
                             <div className="flex items-start">
                                 <div className={`p-2 rounded-full ${orderStatus.status === 'Livrée' ? 'bg-green-100 text-green-600' :
-                                        'bg-gray-100 text-gray-400'
+                                    'bg-gray-100 text-gray-400'
                                     }`}>
                                     <CheckCircle size={20} />
                                 </div>
@@ -100,7 +100,7 @@ export default function SuiviCommandePage() {
 
                             <div className="flex items-start">
                                 <div className={`p-2 rounded-full ${['Expédiée', 'En cours de livraison', 'Livrée'].includes(orderStatus.status) ?
-                                        'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+                                    'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
                                     }`}>
                                     <Truck size={20} />
                                 </div>
@@ -112,7 +112,7 @@ export default function SuiviCommandePage() {
 
                             <div className="flex items-start">
                                 <div className={`p-2 rounded-full ${['En cours de livraison', 'Livrée'].includes(orderStatus.status) ?
-                                        'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+                                    'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
                                     }`}>
                                     <Package size={20} />
                                 </div>
@@ -124,7 +124,7 @@ export default function SuiviCommandePage() {
 
                             <div className="flex items-start">
                                 <div className={`p-2 rounded-full ${orderStatus.status === 'Livrée' ?
-                                        'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                                    'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
                                     }`}>
                                     <CheckCircle size={20} />
                                 </div>

@@ -19,11 +19,6 @@ export default function ThankYou({ onReturnToStore }) {
                 <span className="font-bold text-gray-800">Nous vous contacterons bientôt</span> pour confirmer la livraison.
             </p>
 
-            {/* Thank you summary positioned directly after the order confirmation */}
-            <div className="mb-6 text-center w-full max-w-xs mx-auto" dir="rtl">
-                <h3 className="text-lg font-black text-gray-900 mb-1 sm:text-xl">شكراً لك!</h3>
-                <p className="text-gray-500 font-medium text-sm sm:text-base">تم استلام طلبك بنجاح. سنتصل بك قريباً لتأكيد التوصيل.</p>
-            </div>
 
             <div className="w-full space-y-3 max-w-xs sm:max-w-sm sm:space-y-4">
                 <button

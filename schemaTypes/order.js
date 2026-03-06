@@ -19,6 +19,12 @@ export default {
             type: 'string',
         },
         {
+            name: 'wilayaCode',
+            title: 'Wilaya Code',
+            type: 'string',
+            description: 'Two-digit wilaya code (e.g., "16" for Algiers)',
+        },
+        {
             name: 'commune',
             title: 'Commune',
             type: 'string',
@@ -81,6 +87,30 @@ export default {
                     { title: 'Sanity Schema Settings', value: 'schema' }
                 ]
             },
+            readOnly: true,
+        },
+        {
+            name: 'rmExpressTrackingNumber',
+            title: 'RM Express Tracking Number',
+            type: 'string',
+            readOnly: true,
+        },
+        {
+            name: 'rmExpressStatus',
+            title: 'RM Express Status',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Created', value: 'created' },
+                    { title: 'Failed', value: 'failed' }
+                ]
+            },
+            readOnly: true,
+        },
+        {
+            name: 'rmExpressError',
+            title: 'RM Express Error',
+            type: 'text',
             readOnly: true,
         }
     ],

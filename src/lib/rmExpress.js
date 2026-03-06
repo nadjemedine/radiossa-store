@@ -1,4 +1,4 @@
-import { client } from './sanity.js';
+﻿import { client } from './sanity.js';
 
 const ENV_BASE_URL = process.env.RM_EXPRESS_API_URL || 'https://rmexpress.ecotrack.dz/api/v1';
 const ENV_API_TOKEN = process.env.RM_EXPRESS_API_TOKEN;
@@ -83,8 +83,9 @@ async function sendShipmentWithConfig(orderData, config) {
     const orderRemark = orderData.remark || fallbackRemark;
 
     const wilayaRaw = String(orderData.wilaya || '');
+    const wilayaCodeFromInput = String(orderData.wilayaCode || '').trim();
     const wilayaCodeMatch = wilayaRaw.match(/\d+/);
-    const wilayaCode = wilayaCodeMatch ? wilayaCodeMatch[0].padStart(2, '0') : '';
+    const wilayaCode = wilayaCodeFromInput || (wilayaCodeMatch ? wilayaCodeMatch[0].padStart(2, '0') : '');
     const normalizedAddress = orderData.address
         || [orderData.commune, orderData.wilayaName || orderData.wilaya].filter(Boolean).join(', ');
 
@@ -152,6 +153,7 @@ export async function createShipment(orderData) {
         const attemptedSources = configs.map((cfg) => cfg.source);
 
         if (configs.length === 0) {
+            console.warn('No RM Express configuration found - order will be saved without shipment creation');
             return {
                 success: false,
                 error: 'No RM Express configuration found in env or Sanity settings',
@@ -169,9 +171,11 @@ export async function createShipment(orderData) {
                 lastError = error;
                 lastSource = config.source;
                 console.error(`RM Express shipment failed with ${config.source} config:`, error);
+                // Continue to next config instead of failing immediately
             }
         }
 
+        // If all configs failed, return failure but don't crash
         return {
             success: false,
             error: lastError?.name === 'AbortError'
@@ -255,3 +259,4 @@ export async function trackShipment(trackingNumber) {
         };
     }
 }
+

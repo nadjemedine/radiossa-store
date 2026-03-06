@@ -40,11 +40,11 @@ export default function PreFooter() {
 
     return (
         <div
-            className="py-8 px-4"
+            className="py-8 md:py-16 px-4"
             style={{ backgroundColor }}
         >
-            <div className="max-w-md mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                     {rectangles.map((rect, index) => {
                         if (!rect) return null;
 
@@ -66,7 +66,7 @@ export default function PreFooter() {
                         return (
                             <div
                                 key={index}
-                                className={`flex flex-col items-center justify-center p-4 rounded-xl text-center col-span-${colSpan}`}
+                                className={`flex flex-col items-center justify-center p-6 md:p-10 rounded-2xl text-center col-span-${colSpan} shadow-sm transition-all hover:shadow-md`}
                                 style={{
                                     backgroundColor: rectBgColor,
                                     color: rectTextColor,
@@ -74,24 +74,24 @@ export default function PreFooter() {
                             >
                                 {rect.icon && rect.icon.asset && rect.icon.asset._ref ? (
                                     <img
-                                        src={urlFor(rect.icon).width(rect.iconSize || 40).height(rect.iconSize || 40).url()}
+                                        src={urlFor(rect.icon).width(rect.iconSize || 60).height(rect.iconSize || 60).url()}
                                         alt={rect.title || `Icon ${index + 1}`}
-                                        className="mb-2 object-contain"
+                                        className="mb-4 object-contain"
                                         style={{
-                                            width: `${rect.iconSize || 40}px`,
-                                            height: `${rect.iconSize || 40}px`
+                                            width: `${rect.iconSize ? rect.iconSize * 1.5 : 60}px`,
+                                            height: `${rect.iconSize ? rect.iconSize * 1.5 : 60}px`
                                         }}
                                     />
                                 ) : (
                                     <IconComponent
-                                        size={rect.iconSize || 40}
-                                        className="mb-2"
+                                        size={rect.iconSize ? rect.iconSize * 1.5 : 60}
+                                        className="mb-4"
                                         style={{ color: rectIconColor }}
                                     />
                                 )}
                                 {rect.title && (
                                     <h3
-                                        className="font-bold text-sm mb-1"
+                                        className="font-bold text-base md:text-xl mb-2"
                                         style={{ color: rectTextColor }}
                                     >
                                         {rect.title}
@@ -99,7 +99,7 @@ export default function PreFooter() {
                                 )}
                                 {rect.subtitle && (
                                     <p
-                                        className="text-xs"
+                                        className="text-xs md:text-sm opacity-80"
                                         style={{ color: rectTextColor }}
                                     >
                                         {rect.subtitle}

@@ -47,14 +47,14 @@ export default function ContactPage() {
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-md mx-auto px-4">
                 <h1 className="text-2xl font-bold text-center text-gray-900 mb-8">Contactez-nous</h1>
-                
+
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8">
                     <h2 className="text-lg font-bold text-gray-900 mb-6 text-center">Informations de Contact</h2>
-                    
+
                     {footerData.contactInfo && (
                         <div className="space-y-4">
                             {footerData.contactInfo.phone && (
-                                <a 
+                                <a
                                     href={`tel:${footerData.contactInfo.phone}`}
                                     className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors"
                                 >
@@ -67,9 +67,9 @@ export default function ContactPage() {
                                     <span style={{ color: textColor }}>{footerData.contactInfo.phone}</span>
                                 </a>
                             )}
-                            
+
                             {footerData.contactInfo.email && (
-                                <a 
+                                <a
                                     href={`mailto:${footerData.contactInfo.email}`}
                                     className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors"
                                 >
@@ -82,7 +82,7 @@ export default function ContactPage() {
                                     <span style={{ color: textColor }}>{footerData.contactInfo.email}</span>
                                 </a>
                             )}
-                            
+
                             {footerData.contactInfo.address && (
                                 <div className="p-4 bg-gray-50 rounded-2xl">
                                     <div className="flex items-start gap-3">
@@ -103,7 +103,7 @@ export default function ContactPage() {
                 {footerData.socialLinks && footerData.socialLinks.length > 0 && (
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8">
                         <h2 className="text-lg font-bold text-gray-900 mb-6 text-center">Réseaux Sociaux</h2>
-                        
+
                         <div className="grid grid-cols-2 gap-3">
                             {footerData.socialLinks.map((link, index) => {
                                 const IconComponent = platformIcons[link.platform] || Instagram;

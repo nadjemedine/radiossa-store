@@ -1,9 +1,7 @@
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/lib/cart-context';
 import { client } from '@/lib/sanity';
 
-const inter = Inter({ subsets: ['latin'] });
 
 // Fetch metadata at build time
 export async function generateMetadata() {
@@ -14,9 +12,9 @@ export async function generateMetadata() {
       siteName
     }`);
 
-    const title = settings?.previewTitle || 'Radiossa Clothing | عنوان الفخامة';
-    const description = settings?.previewDescription || 'أفضل الملابس العصرية في الجزائر. توصيل سريع لجميع الولايات.';
-    const siteName = settings?.siteName || 'عنوان الفخامة';
+    const title = settings?.previewTitle || 'Radiossa Clothing | Le luxe à votre portée';
+    const description = settings?.previewDescription || 'La meilleure mode contemporaine en Algérie. Livraison rapide dans 58 Wilayas.';
+    const siteName = settings?.siteName || 'Radiossa Clothing';
 
     return {
       metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -26,7 +24,7 @@ export async function generateMetadata() {
         title,
         description,
         siteName,
-        images: ['/og-image.png'], // This will use our static fallback route
+        images: ['/og-image.png'],
       },
       twitter: {
         card: 'summary_large_image',
@@ -42,11 +40,11 @@ export async function generateMetadata() {
     console.error('Error fetching metadata:', error);
     return {
       metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
-      title: 'Radiossa Clothing | الفخامة',
-      description: 'أفضل الملابس العصرية في الجزائر. توصيل سريع لجميع الولايات.',
+      title: 'Radiossa Clothing | Élégance & Style',
+      description: 'Découvrez notre collection exclusive. Livraison disponible dans 58 Wilayas.',
       openGraph: {
-        title: 'الفخامة',
-        description: 'أفضل الملابس العصرية في الجزائر. توصيل سريع لجميع الولايات.',
+        title: 'Radiossa Clothing',
+        description: 'La meilleure mode contemporaine en Algérie.',
         images: ['/og-image.png'],
       },
     };
@@ -55,8 +53,8 @@ export async function generateMetadata() {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="ltr">
-      <body className={inter.className}>
+    <html lang="fr" dir="ltr">
+      <body className="font-sans">
         <CartProvider>
           {children}
         </CartProvider>

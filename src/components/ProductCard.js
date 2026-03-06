@@ -55,7 +55,7 @@ export default function ProductCard({ product, onClick, priority = false }) {
                     alt={product.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 200px"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     priority={priority}
                     quality={75}
                     placeholder="blur"
@@ -94,7 +94,7 @@ export default function ProductCard({ product, onClick, priority = false }) {
                     </p>
                     {product.comparePrice && (
                         <div className="text-[10px] bg-red-500 text-white px-2 py-1 rounded-full inline-block font-bold">
-                            خصم {(Math.round((1 - product.price / product.comparePrice) * 100))}%
+                            -{Math.round((1 - product.price / product.comparePrice) * 100)}%
                         </div>
                     )}
                 </div>
@@ -105,7 +105,7 @@ export default function ProductCard({ product, onClick, priority = false }) {
                     }}
                     className="w-full mt-2 bg-primary text-white text-[11px] font-bold py-2.5 rounded hover:opacity-90 transition-all uppercase tracking-wider"
                 >
-                    أضف إلى السلة
+                    Ajouter au panier
                 </button>
             </div>
         </div>
