@@ -53,9 +53,48 @@ export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClic
                     }));
                 }
 
-                // Fetch top 3 categories
-                const categoriesData = await client.fetch(`*[_type == "category"] | order(_createdAt asc)[0...3]`);
-                setCategories(categoriesData || []);
+                // Fetch menu configuration and categories
+                const [menuData, allCategories] = await Promise.all([
+                    client.fetch(`*[_type == "sideMenu"][0]{
+                        showCollections,
+                        collectionsHeading,
+                        showCollectionsHeading,
+                        collectionsHeadingAlignment,
+                        collectionsHeadingStyle,
+                        collectionsHeadingColor,
+                        "collections": collections[]->{_id, name, "title": name, "slug": slug.current, icon}
+                    }`),
+                    client.fetch(`*[_type == "category"] | order(_createdAt asc) {
+                        _id,
+                        name,
+                        "title": name,
+                        "slug": slug.current,
+                        icon
+                    }`)
+                ]);
+
+                // Store menu settings for heading display
+                if (menuData) {
+                    setSettings(prev => ({
+                        ...prev,
+                        collectionsHeading: menuData.collectionsHeading || 'Achats par collection',
+                        showCollectionsHeading: menuData.showCollectionsHeading !== false,
+                        collectionsHeadingAlignment: menuData.collectionsHeadingAlignment || 'left',
+                        collectionsHeadingStyle: menuData.collectionsHeadingStyle || 'bold-italic',
+                        collectionsHeadingColor: menuData.collectionsHeadingColor || '#000000',
+                    }));
+                }
+
+                // Determine which categories to display
+                if (menuData?.showCollections !== false) {
+                    if (menuData?.collections && menuData.collections.length > 0) {
+                        setCategories(menuData.collections);
+                    } else {
+                        setCategories(allCategories || []);
+                    }
+                } else {
+                    setCategories([]);
+                }
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -140,6 +179,75 @@ export default function Header({ activeTab, onCartClick, onMenuClick, onLogoClic
                 </div>
 
                 {/* Categories Bar (The Menu Bar) */}
+                {categories.length > 0 && (
+                    <div className="flex flex-col bg-white border-t border-gray-50/50">
+                        {/* Collections Section Heading */}
+                        {(settings.showCollectionsHeading !== false && settings.collectionsHeading) && (
+                            <div className="px-4 pt-3 pb-1"
+                                style={{
+                                    textAlign: settings.collectionsHeadingAlignment || 'left'
+                                }}
+                            >
+                                <h3
+                                    className={`text-[10px] uppercase tracking-widest ${settings.collectionsHeadingStyle === 'bold' ? 'font-bold' :
+                                        settings.collectionsHeadingStyle === 'italic' ? 'italic font-medium' :
+                                            settings.collectionsHeadingStyle === 'bold-italic' ? 'font-bold italic' :
+                                                'font-medium'
+                                        }`}
+                                    style={{
+                                        color: settings.collectionsHeadingColor || '#666'
+                                    }}
+                                >
+                                    {settings.collectionsHeading}
+                                </h3>
+                            </div>
+                        )}
+
+                        <div className="flex bg-white overflow-x-auto no-scrollbar py-2">
+                            <div className="flex items-center gap-3 px-4 min-w-full">
+                                {/* "All" Category */}
+                                <button
+                                    onClick={() => {
+                                        if (typeof onCategorySelect === 'function') {
+                                            onCategorySelect(null);
+                                        }
+                                    }}
+                                    className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${!activeCategoryId
+                                        ? 'bg-primary text-white scale-105 shadow-lg shadow-primary/20'
+                                        : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                                        }`}
+                                >
+                                    Tout
+                                </button>
+
+                                {/* Dynamic Categories from Schema */}
+                                {categories.map((category) => (
+                                    <button
+                                        key={category._id}
+                                        onClick={() => {
+                                            if (typeof onCategorySelect === 'function') {
+                                                onCategorySelect({ id: category._id, name: category.name });
+                                            }
+                                        }}
+                                        className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeCategoryId === category._id
+                                            ? 'bg-primary text-white scale-105 shadow-lg shadow-primary/20'
+                                            : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        {category.icon?.asset && (
+                                            <img
+                                                src={urlFor(category.icon).url()}
+                                                alt=""
+                                                className={`w-4 h-4 object-contain ${activeCategoryId === category._id ? 'brightness-0 invert' : ''}`}
+                                            />
+                                        )}
+                                        {category.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </header>
 
             <style jsx>{`

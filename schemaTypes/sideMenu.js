@@ -18,6 +18,50 @@ export default {
             initialValue: 'Achats par collection',
         },
         {
+            name: 'showCollectionsHeading',
+            title: 'Show Collections Heading',
+            type: 'boolean',
+            description: 'Toggle to show/hide the collections section heading in the store interface',
+            initialValue: true,
+        },
+        {
+            name: 'collectionsHeadingAlignment',
+            title: 'Heading Alignment',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Left (يسار)', value: 'left' },
+                    { title: 'Center (منتصف)', value: 'center' },
+                    { title: 'Right (يمين)', value: 'right' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'left',
+        },
+        {
+            name: 'collectionsHeadingStyle',
+            title: 'Heading Style',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Normal (عادي)', value: 'normal' },
+                    { title: 'Bold (عريض)', value: 'bold' },
+                    { title: 'Italic (مائل)', value: 'italic' },
+                    { title: 'Bold Italic (عريض مائل)', value: 'bold-italic' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'bold-italic',
+        },
+        {
+            name: 'collectionsHeadingColor',
+            title: 'Heading Color',
+            type: 'string',
+            description: 'Hex color code for the heading text',
+            placeholder: '#000000',
+            initialValue: '#000000',
+        },
+        {
             name: 'showCollections',
             title: 'Show Collections',
             type: 'boolean',

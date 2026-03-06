@@ -65,6 +65,10 @@ export default function SideMenu({ isOpen, onClose, onCategorySelect, onCartClic
                     client.fetch(`*[_type == "sideMenu"][0]{
                         menuTitle,
                         collectionsHeading,
+                        showCollectionsHeading,
+                        collectionsHeadingAlignment,
+                        collectionsHeadingStyle,
+                        collectionsHeadingColor,
                         showCollections,
                         "collections": collections[]->{_id, name, "title": name, "slug": slug.current, icon},
                         pagesHeading,
@@ -206,6 +210,26 @@ export default function SideMenu({ isOpen, onClose, onCategorySelect, onCartClic
                         {/* Collections Section */}
                         {showCollections && (
                             <>
+                                {(menuSettings?.showCollectionsHeading !== false && (menuSettings?.collectionsHeading || 'Achats par collection')) && (
+                                    <div className="px-6 mt-4 mb-2"
+                                        style={{
+                                            textAlign: menuSettings?.collectionsHeadingAlignment || 'left'
+                                        }}
+                                    >
+                                        <h3
+                                            className={`text-xs uppercase tracking-widest ${menuSettings?.collectionsHeadingStyle === 'bold' ? 'font-bold text-gray-900' :
+                                                menuSettings?.collectionsHeadingStyle === 'italic' ? 'italic font-semibold text-gray-500' :
+                                                    menuSettings?.collectionsHeadingStyle === 'bold-italic' ? 'font-bold italic text-gray-900' :
+                                                        'font-semibold text-gray-400'
+                                                }`}
+                                            style={{
+                                                color: menuSettings?.collectionsHeadingColor
+                                            }}
+                                        >
+                                            {menuSettings?.collectionsHeading || 'Achats par collection'}
+                                        </h3>
+                                    </div>
+                                )}
                                 {isLoading ? (
                                     <div className="flex justify-center py-8">
                                         <div className="w-6 h-6 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
