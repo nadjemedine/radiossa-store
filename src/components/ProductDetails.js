@@ -11,21 +11,40 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
     const { addToCart } = useCart();
     const [quantity, setQuantity] = useState(1);
 
-    // Derived values from inventory
+    // Derived values from inventory or explicit fields
     const inventory = product.inventory || [];
-    const availableColorsSet = new Set();
-    const availableSizesSet = new Set();
-
-    inventory.forEach(variant => {
-        if (variant.color) availableColorsSet.add(variant.color);
-        if (variant.size) availableSizesSet.add(variant.size);
-    });
-
-    const colors = Array.from(availableColorsSet);
-    const sizes = Array.from(availableSizesSet);
+    
+    // Extract unique colors and sizes from inventory that have stock > 0
+    const colorsWithStock = Array.from(
+        new Set(
+            inventory
+                .filter(v => v.stock && v.stock > 0)
+                .flatMap(v => v.color || [])
+        )
+    ).filter(Boolean);
+    
+    const sizesWithStock = Array.from(
+        new Set(
+            inventory
+                .filter(v => v.stock && v.stock > 0)
+                .flatMap(v => v.size || [])
+        )
+    ).filter(Boolean);
+    
+    // Use new schema fields as priority, fallback to inventory derivation
+    const colors = product.colors && product.colors.length > 0 
+        ? product.colors 
+        : colorsWithStock;
+        
+    const sizes = product.sizes && product.sizes.length > 0
+        ? product.sizes
+        : sizesWithStock;
+    
+    // Add "Standard" only if no sizes are found at all
+    if (sizes.length === 0) sizes.push("Standard");
 
     const [selectedColor, setSelectedColor] = useState(colors[0] || null);
-    const [selectedSize, setSelectedSize] = useState(sizes[0] || "Standard");
+    const [selectedSize, setSelectedSize] = useState(sizes[0] || sizes[0] || "Standard");
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [touchStart, setTouchStart] = useState(null);
@@ -37,10 +56,11 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
         : '/placeholder.png';
 
     // Check if the current combination is in stock
-    const currentVariant = inventory.find(v =>
-        (v.size === selectedSize || (!v.size && selectedSize === "Standard")) &&
-        (v.color === selectedColor || !v.color)
-    );
+    const currentVariant = inventory.find(v => {
+        const hasSize = v.size === selectedSize || (!v.size && selectedSize === "Standard");
+        const hasColor = v.color === selectedColor || !v.color;
+        return hasSize && hasColor;
+    });
     const isOutOfStock = currentVariant ? currentVariant.stock <= 0 : (inventory.length > 0 ? true : false);
 
     useEffect(() => {
@@ -78,13 +98,12 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
     const handleAddToCart = () => {
         if (isOutOfStock) return;
 
-        for (let i = 0; i < quantity; i++) {
-            addToCart({
-                ...product,
-                selectedColor,
-                selectedSize
-            });
-        }
+        addToCart({
+            ...product,
+            selectedColor,
+            selectedSize,
+            quantity
+        });
         onClose();
     };
 
@@ -217,10 +236,17 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                             const displayName = parts[0].trim();
                                             const rawColor = parts.length > 1 ? parts[1].trim() : parts[0].trim();
 
+                                            // Get stock for this color (sum across all sizes)
+                                            const totalStock = inventory
+                                                .filter(v => v.color === rawColor || v.color === displayName)
+                                                .reduce((sum, v) => sum + (v.stock || 0), 0);
+
+                                            // Skip if no stock
+                                            if (totalStock <= 0) return null;
+
                                             // Get color hex from inventory variant
                                             const variant = inventory.find(v => 
-                                                (v.color || '').includes(displayName) || 
-                                                (v.color || '').includes(rawColor)
+                                                v.color === displayName || v.color === rawColor
                                             );
                                             
                                             const colorMap = {
@@ -254,9 +280,26 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                 'خمري': '#800020', 'Burgundy': '#800020',
                                                 'موكا': '#967969', 'Mocha': '#967969',
                                                 'برونزي': '#cd7f32', 'Bronze': '#cd7f32',
+                                                'كرزي': '#de3163', 'Cerise': '#de3163', 'cerise': '#de3163',
+                                                'موف': '#dda0dd', 'Mauve': '#dda0dd',
+                                                'فيروزي': '#40e0d0', 'Turquoise': '#40e0d0',
+                                                'عسيري': '#808000', 'Olive': '#808000',
+                                                'بورдо': '#722f37', 'Bordeaux': '#722f37',
+                                                'عاجي': '#fffff0', 'Ivory': '#fffff0',
+                                                'ليموني': '#fff700', 'Lemon': '#fff700',
+                                                'نيلي': '#4b0082', 'Indigo': '#4b0082',
+                                                'عنابي': '#800000', 'Maroon': '#800000',
+                                                'مششي': '#ffb6c1', 'Light Pink': '#ffb6c1',
+                                                'ترابي': '#976647', 'Earth': '#976647',
+                                                'طوبي': '#b7410e', 'Rust': '#b7410e',
+                                                'خشبي': '#8b4513', 'Wood': '#8b4513',
+                                                'مشمشي': '#fbceb1', 'Apricot': '#fbceb1',
+                                                'خوخي': '#ffcba4', 'Peach': '#ffcba4',
+                                                'حجر': '#7f7f7f', 'Stone': '#7f7f7f',
+                                                'رصاصي': '#70809a', 'Slate': '#70809a',
                                             };
                                             
-                                            const bgColor = variant?.colorHex || colorMap[rawColor] || rawColor;
+                                            const bgColor = variant?.colorHex || colorMap[rawColor] || colorMap[displayName] || rawColor;
                                             const isWhite = bgColor.toLowerCase() === '#ffffff' || bgColor.toLowerCase() === 'white';
                                             const isActive = selectedColor === colorStr;
 
@@ -264,9 +307,14 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                 <div key={colorStr} className="flex flex-col items-center gap-2">
                                                     <button
                                                         onClick={() => setSelectedColor(colorStr)}
-                                                        className={`w-10 h-10 rounded-full border-2 transition-all duration-300 relative ${isActive ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-gray-100 hover:border-gray-300'}`}
+                                                        disabled={totalStock <= 0}
+                                                        className={`w-10 h-10 rounded-full border-2 transition-all duration-300 relative ${
+                                                            isActive ? 'border-primary ring-2 ring-primary/20 scale-110' : 
+                                                            totalStock <= 0 ? 'border-gray-200 opacity-40 cursor-not-allowed' :
+                                                            'border-gray-100 hover:border-gray-300'
+                                                        }`}
                                                         style={{ backgroundColor: bgColor }}
-                                                        title={displayName}
+                                                        title={`${displayName} - ${totalStock} متوفر`}
                                                     >
                                                         {isWhite && <div className="absolute inset-0 border border-gray-100 rounded-full pointer-events-none" />}
                                                         {isActive && (
@@ -274,8 +322,18 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                                 <div className={`w-2 h-2 rounded-full ${isWhite ? 'bg-primary' : 'bg-white'}`} />
                                                             </div>
                                                         )}
+                                                        {totalStock <= 0 && (
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <div className="w-full h-0.5 bg-red-500 rotate-45" />
+                                                            </div>
+                                                        )}
                                                     </button>
-                                                    <span className={`text-[10px] font-bold ${isActive ? 'text-primary' : 'text-gray-400'}`}>{displayName}</span>
+                                                    <div className="text-center">
+                                                        <span className={`text-[10px] font-bold block ${isActive ? 'text-primary' : 'text-gray-400'}`}>{displayName}</span>
+                                                        {totalStock > 0 && (
+                                                            <span className="text-[9px] font-bold text-black block">{totalStock}</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             );
                                         })}
@@ -287,15 +345,39 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                 <div className="space-y-4 text-left">
                                     <h3 className="font-bold text-gray-900">Taille</h3>
                                     <div className="flex flex-wrap gap-3">
-                                        {sizes.map(size => (
-                                            <button
-                                                key={size}
-                                                onClick={() => setSelectedSize(size)}
-                                                className={`min-w-[50px] px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${selectedSize === size ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'}`}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
+                                        {sizes.map(size => {
+                                            // Get stock for this size (sum across all colors)
+                                            const totalStock = inventory
+                                                .filter(v => v.size === size)
+                                                .reduce((sum, v) => sum + (v.stock || 0), 0);
+
+                                            // Skip if no stock
+                                            if (totalStock <= 0) return null;
+
+                                            const isSelected = selectedSize === size;
+
+                                            return (
+                                                <button
+                                                    key={size}
+                                                    onClick={() => setSelectedSize(size)}
+                                                    disabled={totalStock <= 0}
+                                                    className={`min-w-[50px] px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all relative ${
+                                                        isSelected 
+                                                            ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' 
+                                                            : totalStock <= 0
+                                                            ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed opacity-50'
+                                                            : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'
+                                                    }`}
+                                                >
+                                                    <div className="flex flex-col items-center">
+                                                        <span>{size}</span>
+                                                        {totalStock > 0 && (
+                                                            <span className="text-[9px] font-bold text-black mt-0.5">{totalStock}</span>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}

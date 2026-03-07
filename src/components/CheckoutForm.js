@@ -203,21 +203,21 @@ export default function CheckoutForm({ onSuccess }) {
                                     <div className="flex items-center justify-between mt-2">
                                         <div className="flex items-center gap-4 bg-gray-50 rounded-full px-3 py-1 scale-90 -ml-2">
                                             <button
-                                                onClick={() => updateQuantity(item._id, -1)}
+                                                onClick={() => updateQuantity(item._id, item.selectedColor, item.selectedSize, -1)}
                                                 className="text-gray-400 hover:text-gray-900"
                                             >
                                                 <Minus size={16} />
                                             </button>
                                             <span className="font-bold text-xs">{item.quantity}</span>
                                             <button
-                                                onClick={() => updateQuantity(item._id, 1)}
+                                                onClick={() => updateQuantity(item._id, item.selectedColor, item.selectedSize, 1)}
                                                 className="text-gray-400 hover:text-gray-900"
                                             >
                                                 <Plus size={16} />
                                             </button>
                                         </div>
                                         <button
-                                            onClick={() => removeFromCart(item._id)}
+                                            onClick={() => removeFromCart(item._id, item.selectedColor, item.selectedSize)}
                                             className="text-gray-300 hover:text-red-500 transition-colors"
                                         >
                                             <Trash2 size={18} />

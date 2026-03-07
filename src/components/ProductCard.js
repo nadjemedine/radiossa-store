@@ -101,7 +101,16 @@ export default function ProductCard({ product, onClick, priority = false }) {
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
-                        addToCart(product);
+                        // Pick default variants if they exist
+                        const defaultColor = (product.colors && product.colors.length > 0) ? product.colors[0] : null;
+                        const defaultSize = (product.sizes && product.sizes.length > 0) ? product.sizes[0] : "Standard";
+                        
+                        addToCart({
+                            ...product,
+                            selectedColor: defaultColor,
+                            selectedSize: defaultSize,
+                            quantity: 1
+                        });
                     }}
                     className="w-full mt-2 bg-primary text-white text-[11px] font-bold py-2.5 rounded hover:opacity-90 transition-all uppercase tracking-wider"
                 >

@@ -45,16 +45,17 @@ export default function Footer() {
 
     return (
         <footer
-            className="py-12 px-4 mt-0 pt-0"
+            className="py-12 px-4"
             style={{ backgroundColor: backgroundColor }}
         >
             <div className="max-w-6xl mx-auto">
+                {/* Logo, Title and Description Section */}
                 <div
-                    className="mb-0 pb-0"
+                    className="mb-8 pb-4"
                     style={{ textAlign: titleAlignment }}
                 >
                     {footerData.subLogo && (
-                        <div className="flex justify-center mb-0 pb-0">
+                        <div className="flex justify-center mb-4">
                             <img
                                 src={urlFor(footerData.subLogo).url()}
                                 alt="Footer Sub Logo"
@@ -68,7 +69,7 @@ export default function Footer() {
                     )}
                     {footerData.title && (
                         <h2
-                            className="text-2xl font-bold mb-0 mt-0"
+                            className="text-2xl font-bold mb-2"
                             style={{ color: textColor }}
                         >
                             {footerData.title}
@@ -76,7 +77,7 @@ export default function Footer() {
                     )}
                     {footerData.description && (
                         <p
-                            className="text-sm"
+                            className="text-sm mt-3"
                             style={{
                                 color: textColor,
                                 textAlign: descriptionAlignment
@@ -87,6 +88,7 @@ export default function Footer() {
                     )}
                 </div>
 
+                {/* Social Links Section */}
                 {footerData.socialLinks && footerData.socialLinks.length > 0 && (
                     <div
                         className="flex gap-4 mb-8"
@@ -113,6 +115,7 @@ export default function Footer() {
                     </div>
                 )}
 
+                {/* Quick Links Section */}
                 {footerData.quickLinks && footerData.quickLinks.length > 0 && (
                     <div
                         className="grid grid-cols-2 gap-4 mb-8"
@@ -134,9 +137,10 @@ export default function Footer() {
                     </div>
                 )}
 
+                {/* Contact Info Section */}
                 {footerData.contactInfo && (
                     <div
-                        className="space-y-3 mb-8"
+                        className="space-y-4 mb-8"
                         style={{ textAlign: contactInfoAlignment }}
                     >
                         {footerData.contactInfo.phone && (
@@ -191,9 +195,10 @@ export default function Footer() {
                     </div>
                 )}
 
+                {/* Copyright Section */}
                 {footerData.copyrightText && (
                     <div
-                        className="pt-6 border-t"
+                        className="pt-6 border-t mt-8"
                         style={{
                             borderColor: 'rgba(255, 255, 255, 0.1)',
                             color: textColor,
@@ -203,7 +208,7 @@ export default function Footer() {
                         }}
                     >
                         {footerData.copyrightText}
-                        <div className="mt-2 flex justify-center items-center gap-1 opacity-80 font-bold">
+                        <div className="mt-3 flex justify-center items-center gap-1 opacity-80 font-bold">
                             <span>Propulsé par</span>
                             <a
                                 href="https://www.instagram.com/nadjem__eddine/"
