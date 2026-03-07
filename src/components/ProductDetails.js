@@ -126,85 +126,85 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
 
             <main className="pb-32 max-w-6xl mx-auto">
                 <div className="flex flex-col md:flex-row md:gap-8 lg:gap-12 md:p-8">
-                    {/* Image Section */}
-                    <div
-                        className="relative aspect-[4/5] w-full md:w-1/2 bg-gray-50 overflow-hidden touch-pan-y md:rounded-3xl shadow-xl"
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onTouchEnd}
-                    >
-                        <Image
-                            src={currentImageUrl}
-                            alt={product.name}
-                            fill
-                            className="object-cover pointer-events-none"
-                            priority={true}
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-                            quality={75}
-                        />
-
-                        {/* Thumbnails Overlay */}
-                        {productImages.length > 1 && (
-                            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 px-4">
-                                {productImages.map((img, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setCurrentImageIndex(idx)}
-                                        className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${currentImageIndex === idx ? 'border-primary scale-110 shadow-lg' : 'border-white/50 backdrop-blur-sm'}`}
-                                    >
-                                        <Image
-                                            src={urlFor(img).width(100).url()}
-                                            alt={`${product.name} thumbnail ${idx}`}
-                                            width={48}
-                                            height={48}
-                                            className="object-cover w-full h-full"
-                                        />
-                                    </button>
-                                ))}
+                    {/* Image Section - Responsive layout for all devices */}
+                    <div className="w-full md:w-1/2">
+                        <div className="flex flex-row gap-2 sm:gap-3 w-full">
+                            {/* Main Image - Adjusted width on mobile for thumbnails */}
+                            <div
+                                className="relative aspect-[4/5] w-[65%] sm:w-full max-w-[380px] sm:max-w-[350px] md:max-w-[400px] lg:max-w-[450px] mx-auto bg-gray-50 overflow-hidden touch-pan-y rounded-xl md:rounded-3xl shadow-lg md:shadow-xl flex-shrink-0"
+                                onTouchStart={onTouchStart}
+                                onTouchMove={onTouchMove}
+                                onTouchEnd={onTouchEnd}
+                            >
+                                <Image
+                                    src={currentImageUrl}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover pointer-events-none"
+                                    priority={true}
+                                    sizes="(max-width: 640px) 65vw, (max-width: 768px) 350px, (max-width: 1024px) 400px, 450px"
+                                    quality={90}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
                             </div>
-                        )}
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
+                            {/* Vertical Thumbnails - On the RIGHT of main image */}
+                            {productImages.length > 1 && (
+                                <div className="flex flex-col gap-1.5 sm:gap-2 overflow-y-auto max-h-[450px] pr-1 flex-shrink-0">
+                                    {productImages.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentImageIndex(idx)}
+                                            className={`flex-shrink-0 rounded-lg md:rounded-xl overflow-hidden border-2 transition-all ${
+                                                currentImageIndex === idx 
+                                                    ? 'border-primary scale-105 shadow-md ring-2 ring-primary/20' 
+                                                    : 'border-gray-200 hover:border-gray-300'
+                                            }`}
+                                            style={{
+                                                width: '60px',
+                                                height: '75px'
+                                            }}
+                                        >
+                                            <Image
+                                                src={urlFor(img).width(120).url()}
+                                                alt={`${product.name} thumbnail ${idx}`}
+                                                width={60}
+                                                height={75}
+                                                className="object-cover w-full h-full"
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Content Container */}
-                    <div className="px-6 py-8 space-y-8 bg-white -mt-4 md:mt-0 rounded-t-3xl md:rounded-none relative z-10 md:w-1/2">
-                        <div className="space-y-2">
-                            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">{product.name}</h1>
-                            <div className="flex items-baseline gap-2">
-                                <div className="space-y-2">
-                                    <p className="text-gray-900 text-3xl font-black">
-                                        {product.comparePrice ? (
-                                            <>
-                                                <span className="text-red-500 line-through text-xl mr-3">
-                                                    {product.comparePrice.toLocaleString()} DA
-                                                </span>
+                    {/* Content Container - Responsive */}
+                    <div className="px-4 md:px-0 py-6 space-y-6 bg-white md:rounded-none relative z-10 md:w-1/2 md:pl-8">
+                        <div className="border-b border-gray-100 pb-5 mb-6 overflow-hidden">
+                            <h1 className="flex items-center gap-2 text-lg md:text-xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap overflow-x-auto scrollbar-hide py-1">
+                                <span className="flex-shrink-0">{product.name}</span>
+                                <span className="text-gray-300 font-light flex-shrink-0 mx-1">|</span>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                    {product.comparePrice ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-red-500 line-through text-sm md:text-base font-bold opacity-80">
+                                                {product.comparePrice.toLocaleString()} DA
+                                            </span>
+                                            <span className="text-xl md:text-2xl font-black text-gray-900">
                                                 {product.price.toLocaleString()} DA
-                                            </>
-                                        ) : (
-                                            <>{product.price.toLocaleString()} DA</>
-                                        )}
-                                    </p>
-                                    {product.comparePrice && (
-                                        <div className="text-sm bg-red-500 text-white px-3 py-1 rounded-full inline-block font-bold">
-                                            -{Math.round((1 - product.price / product.comparePrice) * 100)}%
+                                            </span>
+                                            <span className="bg-red-500 text-white text-[10px] md:text-xs px-2 py-1 rounded-md font-black">
+                                                -{Math.round((1 - product.price / product.comparePrice) * 100)}%
+                                            </span>
                                         </div>
+                                    ) : (
+                                        <span className="text-xl md:text-2xl font-black">{product.price.toLocaleString()} DA</span>
                                     )}
                                 </div>
-                            </div>
+                            </h1>
                         </div>
 
-                        {/* Quick Features */}
-                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                            <div className="flex-shrink-0 flex items-center gap-2 bg-primary/10 px-4 py-3 rounded-2xl border border-primary/20">
-                                <ShieldCheck size={18} className="text-primary" />
-                                <span className="text-[12px] font-bold text-gray-700 whitespace-nowrap">Paiement à la livraison</span>
-                            </div>
-                            <div className="flex-shrink-0 flex items-center gap-2 bg-green-50 px-4 py-3 rounded-2xl border border-green-100">
-                                <Truck size={18} className="text-green-600" />
-                                <span className="text-[12px] font-bold text-gray-700 whitespace-nowrap">Livraison rapide</span>
-                            </div>
-                        </div>
 
                         {/* Selection Options - Responsive Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-6">
@@ -217,7 +217,14 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                             const displayName = parts[0].trim();
                                             const rawColor = parts.length > 1 ? parts[1].trim() : parts[0].trim();
 
+                                            // Get color hex from inventory variant
+                                            const variant = inventory.find(v => 
+                                                (v.color || '').includes(displayName) || 
+                                                (v.color || '').includes(rawColor)
+                                            );
+                                            
                                             const colorMap = {
+                                                // ألوان أساسية
                                                 'أسود': '#000000', 'Black': '#000000', 'noir': '#000000',
                                                 'أبيض': '#FFFFFF', 'White': '#FFFFFF', 'blanc': '#FFFFFF',
                                                 'أحمر': '#ef4444', 'Red': '#ef4444', 'rouge': '#ef4444',
@@ -229,10 +236,27 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                 'وردي': '#ec4899', 'Pink': '#ec4899', 'rose': '#ec4899',
                                                 'برتقالي': '#f97316', 'Orange': '#f97316',
                                                 'بنفسجي': '#8b5cf6', 'Purple': '#8b5cf6', 'violet': '#8b5cf6',
-                                                'كحلي': '#1e3a8a', 'Navy': '#1e3a8a', 'marine': '#1e3a8a'
+                                                'كحلي': '#1e3a8a', 'Navy': '#1e3a8a', 'marine': '#1e3a8a',
+                                                
+                                                // ألوان إضافية
+                                                'بيج': '#d4c4a8', 'Beige': '#d4c4a8', 'beige': '#d4c4a8',
+                                                'فضي': '#c0c0c0', 'Silver': '#c0c0c0', 'argent': '#c0c0c0',
+                                                'ذهبي': '#ffd700', 'Gold': '#ffd700', 'or': '#ffd700',
+                                                'أرجواني': '#9b59b6', 'Mauve': '#9b59b6',
+                                                'تركواز': '#40e0d0', 'Turquoise': '#40e0d0',
+                                                'زيتوني': '#808000', 'Olive': '#808000',
+                                                'نبيتي': '#722f37', 'Bordeaux': '#722f37',
+                                                'جملي': '#c19a6b', 'Camel': '#c19a6b',
+                                                'فحمي': '#36454f', 'Charcoal': '#36454f',
+                                                'سماوي': '#87ceeb', 'Sky': '#87ceeb', 'ciel': '#87ceeb',
+                                                'مرجاني': '#ff7f50', 'Coral': '#ff7f50',
+                                                'كريمي': '#fffdd0', 'Cream': '#fffdd0', 'crème': '#fffdd0',
+                                                'خمري': '#800020', 'Burgundy': '#800020',
+                                                'موكا': '#967969', 'Mocha': '#967969',
+                                                'برونزي': '#cd7f32', 'Bronze': '#cd7f32',
                                             };
-
-                                            const bgColor = colorMap[rawColor] || rawColor;
+                                            
+                                            const bgColor = variant?.colorHex || colorMap[rawColor] || rawColor;
                                             const isWhite = bgColor.toLowerCase() === '#ffffff' || bgColor.toLowerCase() === 'white';
                                             const isActive = selectedColor === colorStr;
 
@@ -294,23 +318,48 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                             </div>
                         )}
 
-                        {/* Quantity Selector */}
-                        <div className="flex items-center justify-between p-5 bg-gray-50/50 rounded-3xl border border-gray-100">
-                            <span className="font-bold text-gray-900">Quantité</span>
-                            <div className="flex items-center gap-6">
-                                <button
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="w-10 h-10 flex items-center justify-center bg-white rounded-full border border-gray-200 text-gray-500 active:scale-90 transition-transform shadow-sm"
-                                >
-                                    <Minus size={18} />
-                                </button>
-                                <span className="font-black text-lg w-4 text-center">{quantity}</span>
-                                <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    className="w-10 h-10 flex items-center justify-center bg-white rounded-full border border-gray-200 text-gray-500 active:scale-90 transition-transform shadow-sm"
-                                >
-                                    <Plus size={18} />
-                                </button>
+                        {/* Quantity and Add to Cart - Side by Side */}
+                        <div className="flex items-center gap-4">
+                            {/* Quantity Selector */}
+                            <div className="flex items-center justify-between px-5 py-3 bg-gray-50/50 rounded-2xl border border-gray-100 flex-shrink-0">
+                                <span className="font-bold text-gray-900 text-sm">Quantité</span>
+                                <div className="flex items-center gap-4 ml-3">
+                                    <button
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full border border-gray-200 text-gray-500 active:scale-90 transition-transform shadow-sm"
+                                    >
+                                        <Minus size={16} />
+                                    </button>
+                                    <span className="font-black text-base w-4 text-center">{quantity}</span>
+                                    <button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full border border-gray-200 text-gray-500 active:scale-90 transition-transform shadow-sm"
+                                    >
+                                        <Plus size={16} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Add to Cart Button */}
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={isOutOfStock}
+                                className={`flex-1 text-white py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all uppercase tracking-wider ${isOutOfStock ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary shadow-primary/30'}`}
+                            >
+                                <ShoppingBag size={18} strokeWidth={2.5} />
+                                {isOutOfStock ? 'Non disponible' : 'Commander'}
+                            </button>
+                        </div>
+
+                        {/* Quick Features */}
+                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide pt-2">
+                            <div className="flex-1 flex items-center justify-center gap-2 bg-primary/5 px-3 py-2.5 rounded-xl border border-primary/10">
+                                <ShieldCheck size={16} className="text-primary" />
+                                <span className="text-[11px] font-bold text-gray-700 whitespace-nowrap uppercase tracking-tight">Paiement à la livraison</span>
+                            </div>
+                            <div className="flex-1 flex items-center justify-center gap-2 bg-green-50/50 px-3 py-2.5 rounded-xl border border-green-100">
+                                <Truck size={16} className="text-green-600" />
+                                <span className="text-[11px] font-bold text-gray-700 whitespace-nowrap uppercase tracking-tight">Livraison rapide</span>
                             </div>
                         </div>
                     </div>
@@ -339,20 +388,6 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                     </div>
                 )}
             </main>
-
-            {/* Sticky Order Button */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 p-6 z-50">
-                <div className="max-w-6xl mx-auto">
-                    <button
-                        onClick={handleAddToCart}
-                        disabled={isOutOfStock}
-                        className={`w-full md:w-1/2 md:mx-auto text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all uppercase tracking-[0.1em] ${isOutOfStock ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary shadow-primary/30'}`}
-                    >
-                        <ShoppingBag size={22} strokeWidth={2.5} />
-                        {isOutOfStock ? 'Non disponible' : 'Commander maintenant'}
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }
