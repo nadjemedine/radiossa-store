@@ -3,7 +3,7 @@
 import { useCart } from '@/lib/cart-context';
 import { urlFor, client } from '@/lib/sanity';
 import Image from 'next/image';
-import { Minus, Plus, ShoppingBag, Truck, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Minus, Plus, ShoppingBag, Truck, ShieldCheck, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 
@@ -54,6 +54,42 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
     const currentImageUrl = productImages[currentImageIndex]
         ? urlFor(productImages[currentImageIndex]).width(1200).url()
         : '/placeholder.png';
+
+    // Auto-update main image when color changes and handle slide show
+    useEffect(() => {
+        if (!selectedColor || productImages.length <= 1) return;
+        
+        // Find all indices of images whose color matches selectedColor
+        const matchIndices = productImages
+            .map((img, idx) => img.color === selectedColor ? idx : -1)
+            .filter(idx => idx !== -1);
+        
+        if (matchIndices.length > 0) {
+            // Set to the first matching image immediately if not already on a matched image
+            setCurrentImageIndex((prev) => matchIndices.includes(prev) ? prev : matchIndices[0]);
+            
+            // If there's more than one matching image and a delay is set, set up interval
+            const delay = product.colorImageTransitionDelay;
+            if (matchIndices.length > 1 && delay && delay > 0) {
+                const intervalId = setInterval(() => {
+                    setCurrentImageIndex(prev => {
+                        const currentIdxInMatches = matchIndices.indexOf(prev);
+                        if (currentIdxInMatches === -1) return matchIndices[0];
+                        
+                        // Stop at the last image instead of looping back to the first
+                        if (currentIdxInMatches === matchIndices.length - 1) {
+                            clearInterval(intervalId);
+                            return prev;
+                        }
+                        
+                        return matchIndices[currentIdxInMatches + 1];
+                    });
+                }, delay * 1000); // convert seconds to ms
+                
+                return () => clearInterval(intervalId);
+            }
+        }
+    }, [selectedColor, productImages, product.colorImageTransitionDelay]);
 
     // Check if the current combination is in stock
     const currentVariant = inventory.find(v => {
@@ -159,12 +195,31 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                     src={currentImageUrl}
                                     alt={product.name}
                                     fill
-                                    className="object-cover pointer-events-none"
+                                    className="object-contain pointer-events-none p-1 md:p-2"
                                     priority={true}
                                     sizes="(max-width: 640px) 65vw, (max-width: 768px) 350px, (max-width: 1024px) 400px, 450px"
-                                    quality={90}
+                                    quality={100}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
+                                
+                                {productImages.length > 1 && (
+                                    <>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length); }}
+                                            className="absolute left-2 top-1/2 -translate-y-1/2 text-white p-1.5 sm:p-2 transition-all z-10 hover:scale-110 active:scale-90"
+                                            aria-label="الصورة السابقة"
+                                        >
+                                            <ChevronLeft size={32} className="sm:w-10 sm:h-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+                                        </button>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setCurrentImageIndex((prev) => (prev + 1) % productImages.length); }}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-white p-1.5 sm:p-2 transition-all z-10 hover:scale-110 active:scale-90"
+                                            aria-label="الصورة التالية"
+                                        >
+                                            <ChevronRight size={32} className="sm:w-10 sm:h-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+                                        </button>
+                                    </>
+                                )}
                             </div>
 
                             {/* Vertical Thumbnails - On the RIGHT of main image */}
@@ -189,7 +244,7 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                 alt={`${product.name} thumbnail ${idx}`}
                                                 width={60}
                                                 height={75}
-                                                className="object-cover w-full h-full"
+                                                className="object-contain w-full h-full p-0.5 bg-white"
                                             />
                                         </button>
                                     ))}

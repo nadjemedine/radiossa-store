@@ -29,10 +29,55 @@ export default {
                     options: {
                         hotspot: true,
                     },
+                    fields: [
+                        {
+                            name: 'color',
+                            title: 'اللون المرتبط بالصورة (اختياري)',
+                            type: 'string',
+                            options: {
+                                list: [
+                                    { title: '⚫ أسود - Black', value: 'Black' },
+                                    { title: '⚪ أبيض - White', value: 'White' },
+                                    { title: '🔴 أحمر - Red', value: 'Red' },
+                                    { title: '🔵 أزرق - Blue / Bleu', value: 'Blue' },
+                                    { title: '🟢 أخضر - Green / Vert', value: 'Green' },
+                                    { title: '🟡 أصفر - Yellow', value: 'Yellow' },
+                                    { title: '🟤 بني - Brown', value: 'Brown' },
+                                    { title: '⚪ رمادي - Grey', value: 'Grey' },
+                                    { title: '🌸 وردي - Pink', value: 'Pink' },
+                                    { title: '🟠 برتقالي - Orange', value: 'Orange' },
+                                    { title: '🟣 بنفسجي - Purple / Violet', value: 'Purple' },
+                                    { title: '🔷 كحلي - Navy', value: 'Navy' },
+                                    { title: '🟤 بيج - Beige', value: 'Beige' },
+                                    { title: '🩶 فضي - Silver', value: 'Silver' },
+                                    { title: '🎨 ذهبي - Gold', value: 'Gold' },
+                                    { title: '🍒 كرزي - Cerise', value: 'Cerise' },
+                                    { title: '💜 أرجواني - Mauve', value: 'Mauve' },
+                                    { title: '💙 تركواز - Turquoise', value: 'Turquoise' },
+                                    { title: '💚 زيتوني - Olive', value: 'Olive' },
+                                    { title: '🧡 نبيتي - Bordeaux', value: 'Bordeaux' },
+                                    { title: '🤎 جملي - Camel', value: 'Camel' },
+                                    { title: '🖤 فحمي - Charcoal', value: 'Charcoal' },
+                                    { title: '🩵 سماوي - Sky', value: 'Sky' },
+                                    { title: '🩷 مرجاني - Coral', value: 'Coral' },
+                                    { title: '🤍 كريمي - Cream', value: 'Cream' },
+                                    { title: '🩴 خمري - Burgundy', value: 'Burgundy' },
+                                    { title: '🟰 موكا - Mocha', value: 'Mocha' },
+                                    { title: '🥉 برونزي - Bronze', value: 'Bronze' },
+                                ]
+                            }
+                        }
+                    ]
                 },
             ],
             description: 'أضف جميع صور المنتج هنا. سيتم عرضها كمعرض صور.',
             validation: Rule => Rule.required().min(1),
+        },
+        {
+            name: 'colorImageTransitionDelay',
+            title: 'مدة التبديل بين الصور لنفس اللون (بالثواني)',
+            type: 'number',
+            description: 'في حال وجود عدة صور لنفس اللون، حدد عدد الثواني للانتقال التلقائي بينها. اتركها فارغة لإلغاء التبديل التلقائي.',
         },
         {
             name: 'price',

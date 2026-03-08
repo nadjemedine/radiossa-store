@@ -54,7 +54,7 @@ export default function ProductCard({ product, onClick, priority = false }) {
                     src={imageUrl}
                     alt={product.name}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                    className="object-contain transition-transform duration-500 group-hover:scale-105 pointer-events-none p-1 bg-white"
                     sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     priority={priority}
                     quality={75}
