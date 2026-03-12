@@ -3,7 +3,7 @@
 import { useCart } from '@/lib/cart-context';
 import { urlFor, client } from '@/lib/sanity';
 import Image from 'next/image';
-import { Minus, Plus, ShoppingBag, Truck, ShieldCheck, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Minus, Plus, ShoppingBag, Truck, ShieldCheck, ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 
@@ -46,6 +46,7 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
     const [selectedColor, setSelectedColor] = useState(colors[0] || null);
     const [selectedSize, setSelectedSize] = useState(sizes[0] || sizes[0] || "Standard");
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
@@ -183,21 +184,25 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                 <div className="flex flex-col md:flex-row md:gap-8 lg:gap-12 md:p-8">
                     {/* Image Section - Responsive layout for all devices */}
                     <div className="w-full md:w-1/2">
-                        <div className="flex flex-row gap-2 sm:gap-3 w-full">
-                            {/* Main Image - Adjusted width on mobile for thumbnails */}
+                        <div className="flex flex-col gap-3 sm:gap-4 w-full">
+                            {/* Main Image */}
                             <div
-                                className="relative aspect-[4/5] w-[65%] sm:w-full max-w-[380px] sm:max-w-[350px] md:max-w-[400px] lg:max-w-[450px] mx-auto bg-gray-50 overflow-hidden touch-pan-y rounded-xl md:rounded-3xl shadow-lg md:shadow-xl flex-shrink-0"
+                                className="relative aspect-[4/5] w-full max-w-[380px] sm:max-w-[400px] md:max-w-[450px] mx-auto bg-gray-50 overflow-hidden touch-pan-y rounded-xl md:rounded-3xl shadow-lg md:shadow-xl flex-shrink-0 cursor-pointer group"
                                 onTouchStart={onTouchStart}
                                 onTouchMove={onTouchMove}
                                 onTouchEnd={onTouchEnd}
+                                onClick={() => setIsImageModalOpen(true)}
                             >
+                                <div className="absolute top-4 right-4 z-20 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                                </div>
                                 <Image
                                     src={currentImageUrl}
                                     alt={product.name}
                                     fill
-                                    className="object-contain pointer-events-none p-1 md:p-2"
+                                    className="object-cover pointer-events-none group-hover:scale-105 transition-transform duration-500"
                                     priority={true}
-                                    sizes="(max-width: 640px) 65vw, (max-width: 768px) 350px, (max-width: 1024px) 400px, 450px"
+                                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 400px, 450px"
                                     quality={100}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
@@ -222,17 +227,17 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                 )}
                             </div>
 
-                            {/* Vertical Thumbnails - On the RIGHT of main image */}
+                            {/* Horizontal Thumbnails - Below main image */}
                             {productImages.length > 1 && (
-                                <div className="flex flex-col gap-1.5 sm:gap-2 overflow-y-auto max-h-[450px] pr-1 flex-shrink-0">
+                                <div className="flex flex-row gap-2 sm:gap-3 overflow-x-auto pb-2 w-full justify-start md:justify-center scrollbar-hide px-1">
                                     {productImages.map((img, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => setCurrentImageIndex(idx)}
                                             className={`flex-shrink-0 rounded-lg md:rounded-xl overflow-hidden border-2 transition-all ${
                                                 currentImageIndex === idx 
-                                                    ? 'border-primary scale-105 shadow-md ring-2 ring-primary/20' 
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-primary ring-2 ring-primary/20' 
+                                                    : 'border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100'
                                             }`}
                                             style={{
                                                 width: '60px',
@@ -244,7 +249,7 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                 alt={`${product.name} thumbnail ${idx}`}
                                                 width={60}
                                                 height={75}
-                                                className="object-contain w-full h-full p-0.5 bg-white"
+                                                className="object-cover w-full h-full bg-white"
                                             />
                                         </button>
                                     ))}
@@ -369,7 +374,7 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                             'border-gray-100 hover:border-gray-300'
                                                         }`}
                                                         style={{ backgroundColor: bgColor }}
-                                                        title={`${displayName} - ${totalStock} متوفر`}
+                                                        title={`${displayName} - ${totalStock > 0 ? 'متوفر' : 'نَفدت الكمية'}`}
                                                     >
                                                         {isWhite && <div className="absolute inset-0 border border-gray-100 rounded-full pointer-events-none" />}
                                                         {isActive && (
@@ -385,9 +390,6 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                     </button>
                                                     <div className="text-center">
                                                         <span className={`text-[10px] font-bold block ${isActive ? 'text-primary' : 'text-gray-400'}`}>{displayName}</span>
-                                                        {totalStock > 0 && (
-                                                            <span className="text-[9px] font-bold text-black block">{totalStock}</span>
-                                                        )}
                                                     </div>
                                                 </div>
                                             );
@@ -426,9 +428,6 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                                                 >
                                                     <div className="flex flex-col items-center">
                                                         <span>{size}</span>
-                                                        {totalStock > 0 && (
-                                                            <span className="text-[9px] font-bold text-black mt-0.5">{totalStock}</span>
-                                                        )}
                                                     </div>
                                                 </button>
                                             );
@@ -525,6 +524,54 @@ export default function ProductDetails({ product, onClose, onNavigate }) {
                     </div>
                 )}
             </main>
+
+            {/* Image Modal for Zoom */}
+            {isImageModalOpen && (
+                <div className="fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
+                    <button 
+                        onClick={() => setIsImageModalOpen(false)}
+                        className="absolute top-4 right-4 sm:top-6 sm:right-6 text-white p-2.5 bg-white/10 hover:bg-white/20 rounded-full transition-all z-50 backdrop-blur-md"
+                        aria-label="إغلاق"
+                    >
+                        <X size={24} />
+                    </button>
+                    
+                    <div 
+                        className="relative w-full h-[85vh] max-w-6xl mx-auto flex items-center justify-center"
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
+                    >
+                        <Image
+                            src={currentImageUrl}
+                            alt={product.name}
+                            fill
+                            className="object-contain pointer-events-none"
+                            quality={100}
+                            sizes="100vw"
+                        />
+                        
+                        {productImages.length > 1 && (
+                            <>
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length); }}
+                                    className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 text-white p-3 sm:p-4 bg-white/10 hover:bg-white/20 rounded-full transition-all z-10 backdrop-blur-md"
+                                    aria-label="الصورة السابقة"
+                                >
+                                    <ChevronLeft size={32} className="sm:w-10 sm:h-10" />
+                                </button>
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex((prev) => (prev + 1) % productImages.length); }}
+                                    className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 text-white p-3 sm:p-4 bg-white/10 hover:bg-white/20 rounded-full transition-all z-10 backdrop-blur-md"
+                                    aria-label="الصورة التالية"
+                                >
+                                    <ChevronRight size={32} className="sm:w-10 sm:h-10" />
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

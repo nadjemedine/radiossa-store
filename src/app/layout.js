@@ -1,6 +1,7 @@
 import './globals.css';
 import { CartProvider } from '@/lib/cart-context';
 import { client } from '@/lib/sanity';
+import ProtectionLayer from '@/components/ProtectionLayer';
 
 
 // Fetch metadata at build time
@@ -56,6 +57,7 @@ export default function RootLayout({ children }) {
     <html lang="fr" dir="ltr">
       <body className="font-sans">
         <CartProvider>
+          <ProtectionLayer />
           {children}
         </CartProvider>
       </body>
